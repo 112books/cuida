@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a5f4a">
+<meta name="description" content="Cuida - Coordinació familiar per a la cura de malalts">
+<title>Cuida</title>
+<link rel="stylesheet" href="css/estil.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icones/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icones/icon-192.png">
+</head>
+<body>
+<header><h1>Cuida</h1><p>LinuxBCN</p></header>
+<main id="contingut">
+<section id="vista-inici" class="vista activa"><h2>Informació general</h2><div class="targeta pacient"><h3>Pacient</h3><p><strong id="nom-pacient">---</strong></p><p id="estat-pacient">---</p></div><div class="targeta avisos"><h3>⚠️ Avisos urgents</h3><ul id="llista-avisos"><li>Carregant...</li></ul></div><div class="targeta"><h3>Accions ràpides</h3><button class="btn-emergencia" onclick="canviarVista('urgencies')">🆘 PROTOCOL D'URGÈNCIES</button><div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn-secundari" onclick="exportarDades()">📤 Exportar dades</button><button class="btn-secundari" onclick="importarDades()">📥 Importar dades</button></div></div></section>
+<section id="vista-graella" class="vista"><h2>Graella Setmanal</h2><div class="selector-escenari"><label for="escenari">Escenari:</label><select id="escenari" onchange="mostrarGraella()"><option value="A">A - Roger tarda</option><option value="B">B - Roger matí</option></select></div><div id="contenidor-graella"><p>Carregant...</p></div></section>
+<section id="vista-contactes" class="vista"><h2>Contactes mèdics i familiars</h2><div id="contenidor-contactes-medics"><h3>Equip mèdic</h3><ul id="llista-contactes-medics"><li>Carregant...</li></ul></div><div id="contenidor-contactes-familiars"><h3>Rols familiars</h3><ul id="llista-rols-familiars"><li>Carregant...</li></ul></div></section>
+<section id="vista-urgencies" class="vista"><h2>Protocol d'Urgències</h2><div id="contenidor-urgencies"><p>Carregant...</p></div></section>
+<section id="vista-medicacio" class="vista"><h2>Medicació</h2><div id="contenidor-medicacio"><p>Carregant...</p></div></section>
+</main>
+<nav id="navegacio-inferior">
+<button onclick="canviarVista('inici')" class="tab-nav actiu" data-vista="inici">🏠<span>Inici</span></button>
+<button onclick="canviarVista('graella')" class="tab-nav" data-vista="graella">📅<span>Graella</span></button>
+<button onclick="canviarVista('contactes')" class="tab-nav" data-vista="contactes">👥<span>Contactes</span></button>
+<button onclick="canviarVista('urgencies')" class="tab-nav tab-emergencia" data-vista="urgencies">🆘<span>Urgències</span></button>
+<button onclick="canviarVista('medicacio')" class="tab-nav" data-vista="medicacio">💊<span>Medicació</span></button>
+</nav>
+<script src="js/traduccions.js"></script>
+<script src="js/dades.js"></script>
+<script src="js/emmagatzematge.js"></script>
+<script src="js/calendari.js"></script>
+<script src="js/main.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('service-worker.js');</script>
+</body>
+</html>

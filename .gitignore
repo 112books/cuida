@@ -1,0 +1,12 @@
+node_modules/
+bower_components/
+dist/
+build/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*.log
+config.local.js
