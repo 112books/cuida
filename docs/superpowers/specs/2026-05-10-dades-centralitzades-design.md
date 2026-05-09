@@ -33,8 +33,8 @@ Cloudflare KV Namespace: CUIDA_DADES
 
 1. L'app carrega → `carregarDades()` fa `fetch('/api/dades')`
 2. El Worker llegeix KV → retorna el JSON
-3. Si KV és buit (primer cop) → el Worker retorna `DADES_INICIALS` del codi
-4. Si hi ha error de xarxa → fallback a `DADES_INICIALS` local (offline)
+3. Si KV és buit (primer cop) o hi ha error de xarxa → client usa `DADES_INICIALS` local com a fallback
+4. La primera vegada que l'editor guarda, KV queda poblat i tots els dispositius llegiran des d'allà
 
 ### Flux d'edició (familiar de referència)
 
