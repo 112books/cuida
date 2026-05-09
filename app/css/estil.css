@@ -63,31 +63,12 @@ body>header{padding:1rem 1rem .5rem;position:sticky;top:0;z-index:100;background
 .seccio-config{background:#fff;border-radius:10px;margin-bottom:.65rem;overflow:hidden}
 .seccio-config summary{padding:.65rem .85rem;cursor:pointer;font-size:.8rem;font-weight:600}
 .seccio-config .contingut-seccio{padding:.15rem .85rem .85rem}
-.camp-form{display:block;margin-bottom:.5rem}
-.camp-form label{display:block;font-size:.7rem;color:#999;margin-bottom:.15rem}
-.camp-form input,.camp-form textarea,.camp-form select{width:100%;padding:.5rem .6rem;border:1px solid #e0e0e0;border-radius:8px;font-size:.85rem;font-family:inherit;background:#fff}
-.camp-form input:focus,.camp-form textarea:focus,.camp-form select:focus{outline:none;border-color:#222}
-.camp-form textarea{min-height:2.5rem;resize:vertical}
-.item-llista-config{background:#f7f7f7;border:1px solid #e5e5e5;border-radius:8px;padding:.6rem;margin-bottom:.4rem}
-.item-llista-config .capsalera-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
-.item-llista-config .capsalera-item strong{font-size:.75rem;color:#222}
-.btn-eliminar{background:none;border:none;color:#999;cursor:pointer;padding:.15rem}
-.btn-eliminar .icn-sm{width:.8rem;height:.8rem}
-.btn-afegir{display:block;width:100%;padding:.45rem;background:#f5f5f5;border:1px dashed #e0e0e0;border-radius:8px;cursor:pointer;font-size:.75rem;color:#999;margin-top:.25rem}
-.btn-guardar{display:block;width:100%;padding:.75rem;background:#222;color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;margin:.75rem 0}
-.btn-guardar .icn-sm{margin-right:.3rem;stroke:#fff}
-.pdf-paste{margin-top:.4rem}
-.pdf-paste summary{font-size:.75rem;color:#999;cursor:pointer;padding:.15rem 0}
-.pdf-paste textarea{width:100%;min-height:3.5rem;padding:.45rem;border:1px solid #e0e0e0;border-radius:8px;font-size:.75rem;font-family:monospace;margin-top:.25rem;resize:vertical}
 .pacient-cap{display:flex;gap:1rem;align-items:center}
 .pacient-cap h3{font-size:.85rem;font-weight:600;margin-bottom:.25rem}
 .pacient-cap p{font-size:.8rem}
 .foto-pacient{width:72px;height:72px;border-radius:50%;object-fit:cover;display:block}
 .foto-pacient-placeholder{width:72px;height:72px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .foto-pacient-placeholder .icn-sm{width:1.5rem;height:1.5rem;color:#999}
-.foto-pacient-preview{width:80px;height:80px;border-radius:8px;object-fit:cover;display:block;margin-bottom:.5rem}
-.proveidor-item{padding:.5rem 0}
-.proveidor-item+.proveidor-item{border-top:1px solid #e5e5e5}
 .peu-vista{font-size:.65rem;color:#b0b0b0;text-align:center;margin-top:1rem;padding:.5rem 1rem 0;border-top:1px solid #e5e5e5;line-height:1.4}
 .guia-intro{font-size:.8rem;color:#999;margin-bottom:.75rem;line-height:1.5}
 .guia-item{padding:.35rem 0;font-size:.78rem;display:flex;gap:.5rem}
