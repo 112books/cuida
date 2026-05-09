@@ -1,7 +1,8 @@
-let dadesApp=null;let perfilActual='buida';
+let dadesApp=null;let perfilActual='avi_joan';
 document.addEventListener('DOMContentLoaded',()=>{carregarDades();renderitzarInici();renderitzarContactes();renderitzarUrgencies();renderitzarMedicacio();renderitzarGraella();renderitzarConfiguracio();});
 function canviarVista(v){document.querySelectorAll('.vista').forEach(x=>x.classList.remove('activa'));document.getElementById('vista-'+v).classList.add('activa');document.querySelectorAll('.tab-nav').forEach(b=>b.classList.toggle('actiu',b.dataset.vista===v));if(v==='configuracio')renderitzarConfiguracio();}
-function carregarDades(){const d=Emmagatzematge.carregar();if(d){dadesApp=d;}else{dadesApp=JSON.parse(JSON.stringify(PLANTILLA_BUIDA));Emmagatzematge.guardar(dadesApp);}}
+function carregarDades(){const d=Emmagatzematge.carregar();if(d){dadesApp=d;perfilActual=detectarPerfil(d);}else{dadesApp=JSON.parse(JSON.stringify(DADES_INICIALS));Emmagatzematge.guardar(dadesApp);}}
+function detectarPerfil(d){if(!d.pacient||!d.pacient.nom)return'buida';if(d.pacient.nom.includes('Joan')&&d.pacient.telefon)return'avi_joan';return'buida';}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function seccioConfigurable(t,c){return'<details class="seccio-config" open><summary>'+esc(t)+'</summary><div class="contingut-seccio">'+c+'</div></details>';}
 
@@ -30,7 +31,8 @@ function renderitzarMedicacio(){if(!dadesApp)return;document.getElementById('con
 function renderitzarGraella(){if(!dadesApp)return;document.getElementById('contenidor-graella').innerHTML=Calendari.generarGraellaHTML(dadesApp,document.getElementById('escenari').value);}
 function mostrarGraella(){renderitzarGraella();}
 function exportarDades(){Emmagatzematge.exportar(dadesApp,'cuida-'+dadesApp.pacient.nom.toLowerCase()+'-'+new Date().toISOString().split('T')[0]+'.json');}
-function importarDades(){Emmagatzematge.importar(d=>{if(confirm('Importar dades de '+(d.pacient?.nom||'desconegut')+'?')){dadesApp=d;Emmagatzematge.guardar(d);renderitzarInici();renderitzarContactes();renderitzarUrgencies();renderitzarMedicacio();renderitzarGraella();renderitzarConfiguracio();}});}
+function importarDades(){Emmagatzematge.importar(d=>{if(confirm('Importar dades de '+(d.pacient?.nom||'desconegut')+'?')){dadesApp=d;perfilActual=detectarPerfil(d);Emmagatzematge.guardar(d);renderitzarInici();renderitzarContactes();renderitzarUrgencies();renderitzarMedicacio();renderitzarGraella();renderitzarConfiguracio();}});}
+function canviarPerfil(p){if(!confirm('Canviar a «'+(p==='buida'?'Plantilla buida':'Avi Joan')+'»? Es perdran els canvis no guardats.'))return;const src=PERFILS[p];if(!src)return;dadesApp=JSON.parse(JSON.stringify(src));perfilActual=p;Emmagatzematge.guardar(dadesApp);renderitzarInici();renderitzarContactes();renderitzarUrgencies();renderitzarMedicacio();renderitzarGraella();renderitzarConfiguracio();}
 
 function guardarConfiguracio(){const d=dadesApp;
   d.pacient.nom=document.getElementById('cfg-pacient-nom')?.value||'';d.pacient.situacio=document.getElementById('cfg-pacient-situacio')?.value||'';d.pacient.nota=document.getElementById('cfg-pacient-nota')?.value||'';d.pacient.telefon=document.getElementById('cfg-pacient-telefon')?.value||'';
@@ -46,6 +48,7 @@ function guardarConfiguracio(){const d=dadesApp;
   Emmagatzematge.guardar(dadesApp);renderitzarInici();renderitzarContactes();renderitzarUrgencies();renderitzarMedicacio();renderitzarGraella();alert(ICONS.check+' Dades guardades');}
 
 function renderitzarConfiguracio(){const d=dadesApp;let h='';
+  h+='<div class="selector-perfil"><button class="btn-perfil'+(perfilActual==='buida'?' actiu':'')+'" onclick="canviarPerfil(\'buida\')">'+ICONS.clipboard+' Plantilla buida</button><button class="btn-perfil'+(perfilActual==='avi_joan'?' actiu':'')+'" onclick="canviarPerfil(\'avi_joan\')">'+ICONS.user+' Avi Joan</button></div>';
   h+='<button class="btn-guardar" onclick="guardarConfiguracio()">'+ICONS.save+' Guardar tot</button>';
   h+=seccioConfigurable('Dades del pacient','<label class="camp-form">Nom <input id="cfg-pacient-nom" value="'+esc(d.pacient.nom)+'"></label><label class="camp-form">Situació <input id="cfg-pacient-situacio" value="'+esc(d.pacient.situacio)+'"></label><label class="camp-form">Telèfon <input id="cfg-pacient-telefon" value="'+esc(d.pacient.telefon||'')+'" type="tel"></label><label class="camp-form">Nota <textarea id="cfg-pacient-nota">'+esc(d.pacient.nota)+'</textarea></label><details class="pdf-paste"><summary>'+ICONS.clipboard+' Enganxa del PDF</summary><textarea placeholder="Enganxa aquí el text del PDF..."></textarea></details>');
   h+=seccioConfigurable('Contactes mèdics ('+d.contactes_medics.length+')','<div id="cfg-contactes-llista">'+d.contactes_medics.map((c,i)=>renderContacteForm(c,i)).join('')+'</div><button class="btn-afegir" onclick="afegirContacte()">+ Afegir contacte</button><details class="pdf-paste"><summary>'+ICONS.clipboard+' Enganxa del PDF</summary><textarea placeholder="Enganxa aquí els contactes del PDF..."></textarea></details>');
