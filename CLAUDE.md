@@ -3,7 +3,8 @@
 ## ESTAT ACTUAL (10 maig 2026)
 
 App PWA per coordinar cura del Joan (cardiorespiratori, oxigen, morfina, PADES).
-Dades centralitzades a GitHub, tots els dispositius veuen el mateix.
+**Codi implementat per a Cloudflare KV — pendent de setup manual al dashboard de Cloudflare.**
+Veure `PER_REPRENDRE.md` per als passos exactes.
 
 ### Repositoris i desplegament
 
@@ -11,15 +12,23 @@ Dades centralitzades a GitHub, tots els dispositius veuen el mateix.
 - **Privat**: `112books/cuida-avi-joan` (dades reals, noindex)
 - **Live**: https://cuida-avi-joan.pages.dev/ (Cloudflare Pages)
 - Build output: `app/`, sense build command
-- Password client-side: "peidro"
+- Password client-side (login): "peidro" — també és `CUIDA_PASSWORD` al KV
 - Desplegament automatic via `git push private main`
 
-### Flux de dades
+### Flux de dades (amb KV actiu)
 
-1. `carregarDades()` → sempre `JSON.parse(JSON.stringify(DADES_INICIALS))` de `dades.js`
-2. No es carrega res de LocalStorage a l'inici
-3. Export/Import JSON manual disponible a Config per fer còpies
-4. Per actualitzar dades: editar `app/js/dades.js`, commit, push → Cloudflare redeploya
+1. `carregarDades()` → async, fa `fetch('/api/dades')` (Cloudflare KV via Pages Function)
+2. Si KV buit o error de xarxa → fallback a `DADES_INICIALS` de `dades.js`
+3. Edició via formulari a Config → POST a `/api/dades` amb password → escriu KV
+4. Tots els dispositius veuen els canvis en la propera recàrrega
+5. Export JSON disponible a Config com a backup manual
+
+### Backend: Cloudflare Pages Function
+
+- Fitxer: `app/functions/api/dades.js` (GET llegeix KV, POST valida password i escriu KV)
+- KV namespace: `CUIDA_DADES` (clau única "dades" → JSON complet)
+- Variable d'entorn: `CUIDA_PASSWORD` (Secret a Cloudflare Pages Settings)
+- **IMPORTANT:** com que el publish dir és `app/`, les functions van a `app/functions/`, NO a l'arrel del repo
 
 ### Model de dades (`app/js/dades.js`)
 
@@ -28,6 +37,8 @@ contactes_medics (rol, nom, telefon, notes, prioritat),
 proveidors (nom, telefon, notes),
 rols_familiars (rol, principal, suplent, telefon, notes),
 medicacio (16 farmacs: nom, dosi, horari, via, per_a_que, notes),
+**empresa_cuidadora (nom, telefon, responsable)** — NOU,
+**cuidadors (nom, telefon, horari)** — NOU (array),
 voluntats_anticipades, protocols_urgencies, pla_avia,
 indicadors_desgast, graella (fase, escenari, cuidadora, ical).
 
@@ -35,13 +46,14 @@ indicadors_desgast, graella (fase, escenari, cuidadora, ical).
 
 ### Fitxers clau
 
-- `app/js/dades.js` — dades inicials (font de veritat)
-- `app/js/main.js` — logica: renderitzarX(), ICONS, carregarDades(), netejarTel()
-- `app/js/calendari.js` — graella setmanal (Calendari.generarGraellaHTML)
-- `app/js/emmagatzematge.js` — nomes export/import JSON
+- `app/functions/api/dades.js` — Pages Function backend KV (GET/POST)
+- `app/js/dades.js` — dades inicials i fallback offline (font de veritat si KV buit)
+- `app/js/main.js` — logica: renderitzarX(), formulari edicio, carregarDades() async
+- `app/js/calendari.js` — graella cuidadors (Calendari.generarGraellaHTML(dades) sense escenari)
+- `app/js/emmagatzematge.js` — export JSON + carregarRemot() + guardarRemot()
 - `app/index.html` — 6 vistes (Inici, Graella, Contactes, Urgencies, Medicacio, Config)
-- `app/css/estil.css` — disseny zen grisos + vermell per emergencies
-- `app/service-worker.js` — cache v2, neteja caches velles
+- `app/css/estil.css` — disseny zen grisos + estils formulari edicio
+- `app/service-worker.js` — cache v3, exclou /api/ del cache
 - `app/imatges/avi-joan.png` — foto del pacient (URL relativa)
 - `app/icones/icon-192.png`, `icon-512.png` — icones PWA placeholder
 
@@ -64,7 +76,8 @@ indicadors_desgast, graella (fase, escenari, cuidadora, ical).
 
 ### PENDENTS
 
-- Telefon cardiòleg i proveidors (farmacia, oxigen, queviures, empresa cuidadores)
+- **Setup Cloudflare KV** (veure PER_REPRENDRE.md — 5-10 min, manual al dashboard)
+- Telèfon cardiòleg i proveïdors (farmacia, oxigen, queviures, empresa cuidadores) — editable ara via formulari
 - DVA (voluntats anticipades) — verificar si existeix
 - Domini `cuida.linuxbcn.cat` a Cloudflare (cal afegir linuxbcn.cat al compte)
 - Icones reals (ara placeholders verds)
@@ -120,8 +133,11 @@ Si es vol edicio des de l'app, implementar Opcio 2 (1-2 hores).
 - Codi en catala
 - Funcions: renderitzarX()
 - Sense dependencies externes
-- Service worker: cache v2, actualitzar `CACHE` i FILES si s'afegeixen fitxers
-- No usar localStorage per dades d'usuari (només export/import)
+- Service worker: cache v3, actualitzar `CACHE` i FILES si s'afegeixen fitxers nous estatics
+- No usar localStorage per dades d'usuari — les dades van a Cloudflare KV via /api/dades
 - `esc()` definida a main.js, NO a calendari.js
 - `netejarTel()` treu espais i guions dels telefonos
-- Contrasenya "peidro" (canviar si cal)
+- Contrasenya "peidro": login client-side (index.html) + CUIDA_PASSWORD al Cloudflare (KV write)
+- `carregarDades()` es async — qualsevol cosa que en depengui ha d'esperar await
+- `Calendari.generarGraellaHTML(dades)` — un sol argument, sense escenari
+- `seccioConfigurable(t, c, obert)` — tercer argument booleà per controlar si s'obre per defecte
