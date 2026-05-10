@@ -64,6 +64,8 @@ body>header{padding:1rem 1rem .5rem;position:sticky;top:0;z-index:100;background
 .seccio-config summary{padding:.65rem .85rem;cursor:pointer;font-size:.8rem;font-weight:600}
 .seccio-config .contingut-seccio{padding:.15rem .85rem .85rem}
 .pacient-cap{display:flex;gap:1rem;align-items:center}
+.pacient-nom{font-size:1.1rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.2rem}
+.pacient-situacio{font-size:.8rem;color:#666;margin-bottom:.3rem}
 .pacient-cap h3{font-size:.85rem;font-weight:600;margin-bottom:.25rem}
 .pacient-cap p{font-size:.8rem}
 .foto-pacient{width:72px;height:72px;border-radius:50%;object-fit:cover;display:block}
