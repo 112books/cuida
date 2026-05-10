@@ -28,7 +28,8 @@ export async function onRequest(context) {
       const r = await fetch(`${GH}/repos/${REPO}/contents/${FILE}`, { headers: ghHeaders(env.GITHUB_TOKEN) });
       if (!r.ok) return new Response(JSON.stringify({ buit: true }), { headers });
       const data = await r.json();
-      const content = atob(data.content.replace(/\n/g, ''));
+      const bytes = Uint8Array.from(atob(data.content.replace(/\n/g, '')), c => c.charCodeAt(0));
+      const content = new TextDecoder().decode(bytes);
       return new Response(content, { headers });
     } catch (e) {
       return new Response(JSON.stringify({ error: 'Error llegint GitHub' }), { status: 500, headers });
