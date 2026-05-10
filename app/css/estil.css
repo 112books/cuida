@@ -47,11 +47,13 @@ body>header{padding:1rem 1rem .5rem;position:sticky;top:0;z-index:100;background
 .graella-setmanal td{padding:.5rem .4rem;border-radius:6px}
 .franja-cuidadora{background:#e8f5e9;color:#1a5f4a;font-size:.7rem}
 .franja-familiar{background:#f3eefb;color:#6b4e8a;font-size:.7rem}
-#llista-avisos{list-style:none}
-.aviso-item{font-size:.8rem;color:#d9534f;padding:.3rem 0;display:flex;align-items:center;gap:.4rem}
-.aviso-item.ok{color:#222}
-.aviso-item:before{content:"";width:5px;height:5px;border-radius:50%;background:#d9534f;flex-shrink:0}
-.aviso-item.ok:before{background:#222}
+.estat-pill{display:inline-block;padding:.3rem .9rem;border-radius:999px;font-size:.8rem;font-weight:600;letter-spacing:.01em}
+.estat-ok{background:#d4edda;color:#1a6630}
+.estat-revisar{background:#fff3cd;color:#7d5a00}
+.estat-critic{background:#f8d7da;color:#7a1c24}
+#llista-avisos{list-style:none;margin-top:.6rem}
+.aviso-item{font-size:.78rem;color:#555;padding:.2rem 0;display:flex;align-items:center;gap:.4rem}
+.aviso-item:before{content:"";width:4px;height:4px;border-radius:50%;background:#aaa;flex-shrink:0}
 .btn-emergencia{display:block;width:100%;padding:.85rem;background:#d9534f;color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer}
 .btn-secundari{display:inline-flex;align-items:center;gap:.3rem;padding:.45rem .85rem;background:#e0e0e0;border:none;border-radius:8px;font-size:.75rem;font-weight:500;color:#1a1a1a;cursor:pointer}
 .btn-secundari .icn-sm{width:.85rem;height:.85rem}
