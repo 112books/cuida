@@ -266,44 +266,50 @@
   },
   "protocols_urgencies": [
     {
-      "situacio": "Cuidadora no ve",
-      "pas1": "Trucar empresa cuidadores",
-      "pas2": "Si no ve ningú, activar família",
-      "responsable": "Coordinador",
-      "greu": false,
-      "tel": ""
+      "situacio": "Cuidadora no apareix",
+      "passos": [
+        { "text": "Trucar a empresa cuidadora", "ref": "empresa_cuidadora" },
+        { "text": "Si no ve ningú, activar família" }
+      ],
+      "responsables": ["Mireia", "Àvia Isabel", "Joanot", "Roger"],
+      "greu": false
     },
     {
-      "situacio": "Urgència lleu (febre, malestar)",
-      "pas1": "Trucar CAP Sant Pau +34 938 993 361",
-      "pas2": "Avisar referent mèdic",
-      "responsable": "Present",
-      "greu": false,
-      "tel": ""
+      "situacio": "Urgència lleu (febre, malestar...)",
+      "passos": [
+        { "text": "Trucar CAP Sant Pau", "tel": "938993361" },
+        { "text": "Avisar referent mèdic" }
+      ],
+      "responsables": ["Àvia Isabel", "Mireia", "Joanot", "Roger"],
+      "greu": false
     },
     {
       "situacio": "URGÈNCIA GREU (aturada, inconsciència)",
-      "pas1": "TRUCAR 112",
-      "pas2": "Avisar coordinador → avisar família sencera",
-      "responsable": "Present + Coordinador",
-      "greu": true,
-      "tel": "112"
+      "passos": [
+        { "text": "Activar teleassistència — prémer la medalla del pacient o l'aparell del menjador" },
+        { "text": "Si no funciona, TRUCAR 112", "tel": "112" },
+        { "text": "Avisar coordinadora" }
+      ],
+      "responsables": ["Mireia", "Àvia Isabel", "Joanot"],
+      "greu": true
     },
     {
       "situacio": "Dolor irruptiu",
-      "pas1": "Administrar Oramorph (pauta PADES)",
-      "pas2": "Si no millora o empitjora, trucar 112",
-      "responsable": "Present",
-      "greu": false,
-      "tel": ""
+      "passos": [
+        { "text": "Administrar Oramorph (pauta PADES)" },
+        { "text": "Si no millora o empitjora, trucar 112", "tel": "112" }
+      ],
+      "responsables": ["Mireia", "Àvia Isabel", "Joanot", "Roger"],
+      "greu": false
     },
     {
       "situacio": "Problema respiratori (dispnea)",
-      "pas1": "Atrovent inhalat (si cal)",
-      "pas2": "Si no millora, trucar 112",
-      "responsable": "Present",
-      "greu": false,
-      "tel": ""
+      "passos": [
+        { "text": "Atrovent inhalat (si cal)" },
+        { "text": "Si no millora, trucar 112", "tel": "112" }
+      ],
+      "responsables": ["empresa_cuidadora", "Àvia Isabel", "Mireia", "Joanot", "Roger"],
+      "greu": false
     }
   ],
   "pla_avia": {

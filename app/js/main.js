@@ -53,6 +53,28 @@ const ICONS = {
 
 function netejarTel(t) { return t.replace(/[\s\-]/g, ''); }
 
+function esMobil(tel) {
+  const t = netejarTel(tel);
+  const local = t.startsWith('+34') ? t.slice(3) : t.startsWith('0034') ? t.slice(4) : t;
+  return local.startsWith('6') || local.startsWith('7');
+}
+
+function trobarTelefon(nom) {
+  const d = dadesApp;
+  if (!nom) return null;
+  if (nom === 'empresa_cuidadora') {
+    const t = d.empresa_cuidadora && d.empresa_cuidadora.telefon;
+    return t && !t.includes('PENDENT') ? t : null;
+  }
+  for (const r of (d.rols_familiars || [])) {
+    if (r.principal && r.principal.includes(nom) && r.telefon && !r.telefon.includes('PENDENT')) return r.telefon;
+  }
+  for (const c of (d.cuidadors || [])) {
+    if (c.nom && c.nom.includes(nom) && c.telefon && !c.telefon.includes('PENDENT')) return c.telefon;
+  }
+  return null;
+}
+
 function renderitzarInici() {
   if (!dadesApp) return;
   const p = dadesApp.pacient;
@@ -84,7 +106,7 @@ function renderitzarContactes() {
     ? '<li class="contacte-item"><div class="contacte-info"><strong>' + esc(empresa.nom) + '</strong>' +
       (empresa.responsable ? '<p>' + esc(empresa.responsable) + '</p>' : '') +
       (empresa.telefon ? '<small>' + esc(empresa.telefon) + '</small>' : '') +
-      '</div><div>' + (tEmp ? '<div class="btn-grup"><a href="tel:' + tnEmp + '" class="btn-trucar">' + ICONS.phone + '</a><a href="facetime:' + tnEmp + '" class="btn-facetime">' + ICONS.video + '</a></div>' : '') + '</div></li>'
+      '</div><div>' + (tEmp ? '<div class="btn-grup"><a href="tel:' + tnEmp + '" class="btn-trucar">' + ICONS.phone + '</a>' + (esMobil(empresa.telefon) ? '<a href="facetime:' + tnEmp + '" class="btn-facetime">' + ICONS.video + '</a>' : '') + '</div>' : '') + '</div></li>'
     : '<li style="padding:.5rem;color:#999">Empresa cuidadora pendent. Ves a Config → Editar dades.</li>';
 
   const cuidadors = dadesApp.cuidadors || [];
@@ -95,14 +117,14 @@ function renderitzarContactes() {
         return '<li class="contacte-item"><div class="contacte-info"><strong>' + esc(c.nom) + '</strong>' +
           (c.horari ? '<p>' + esc(c.horari) + '</p>' : '') +
           (c.telefon ? '<small>' + esc(c.telefon) + '</small>' : '') +
-          '</div><div>' + (t ? '<div class="btn-grup"><a href="tel:' + tn + '" class="btn-trucar">' + ICONS.phone + '</a><a href="facetime:' + tn + '" class="btn-facetime">' + ICONS.video + '</a></div>' : '') + '</div></li>';
+          '</div><div>' + (t ? '<div class="btn-grup"><a href="tel:' + tn + '" class="btn-trucar">' + ICONS.phone + '</a>' + (esMobil(c.telefon) ? '<a href="facetime:' + tn + '" class="btn-facetime">' + ICONS.video + '</a>' : '') + '</div>' : '') + '</div></li>';
       }).join('')
     : '<li style="padding:.5rem;color:#999">Cap cuidador configurat. Ves a Config → Editar dades.</li>';
 
   document.getElementById('llista-contactes-medics').innerHTML = dadesApp.contactes_medics.map(c => {
     const t = c.telefon && !c.telefon.includes('PENDENT');
     const tn = t ? netejarTel(c.telefon) : '';
-    return '<li class="contacte-item"><div class="contacte-info"><strong>' + esc(c.rol) + '</strong><p>' + esc(c.nom) + (c.telefon ? ' &mdash; ' + esc(c.telefon) : '') + '</p><small>' + esc(c.notes) + '</small></div><div>' + (t ? '<div class="btn-grup"><a href="tel:' + tn + '" class="btn-trucar">' + ICONS.phone + '</a><a href="facetime:' + tn + '" class="btn-facetime">' + ICONS.video + '</a></div>' : '<span class="pendent">PENDENT</span>') + '</div></li>';
+    return '<li class="contacte-item"><div class="contacte-info"><strong>' + esc(c.rol) + '</strong><p>' + esc(c.nom) + (c.telefon ? ' &mdash; ' + esc(c.telefon) : '') + '</p><small>' + esc(c.notes) + '</small></div><div>' + (t ? '<div class="btn-grup"><a href="tel:' + tn + '" class="btn-trucar">' + ICONS.phone + '</a>' + (esMobil(c.telefon) ? '<a href="facetime:' + tn + '" class="btn-facetime">' + ICONS.video + '</a>' : '') + '</div>' : '<span class="pendent">PENDENT</span>') + '</div></li>';
   }).join('');
 
   const prov = dadesApp.proveidors || [];
@@ -110,14 +132,14 @@ function renderitzarContactes() {
     ? prov.map(p => {
         const t = p.telefon && !p.telefon.includes('PENDENT');
         const tn = t ? netejarTel(p.telefon) : '';
-        return '<li class="contacte-item"><div class="contacte-info"><strong>' + esc(p.nom) + '</strong>' + (p.notes ? '<small>' + esc(p.notes) + '</small>' : '') + '</div><div>' + (t ? '<div class="btn-grup"><a href="tel:' + tn + '" class="btn-trucar">' + ICONS.phone + '</a><a href="facetime:' + tn + '" class="btn-facetime">' + ICONS.video + '</a></div>' : '<span class="pendent">PENDENT</span>') + '</div></li>';
+        return '<li class="contacte-item"><div class="contacte-info"><strong>' + esc(p.nom) + '</strong>' + (p.notes ? '<small>' + esc(p.notes) + '</small>' : '') + '</div><div>' + (t ? '<div class="btn-grup"><a href="tel:' + tn + '" class="btn-trucar">' + ICONS.phone + '</a>' + (esMobil(p.telefon) ? '<a href="facetime:' + tn + '" class="btn-facetime">' + ICONS.video + '</a>' : '') + '</div>' : '<span class="pendent">PENDENT</span>') + '</div></li>';
       }).join('')
     : '<li style="padding:.5rem;color:#999">Cap proveïdor configurat</li>';
 
   document.getElementById('llista-rols-familiars').innerHTML = dadesApp.rols_familiars.map(r => {
     const t = r.telefon && !r.telefon.includes('PENDENT');
     const tn = t ? netejarTel(r.telefon) : '';
-    return '<li class="contacte-item"><div class="contacte-info"><strong>' + esc(r.rol) + '</strong><p>' + esc(r.principal) + (r.suplent ? ' (+ ' + esc(r.suplent) + ')' : '') + '</p><small>' + esc(r.notes) + '</small></div><div>' + (t ? '<div class="btn-grup"><a href="tel:' + tn + '" class="btn-trucar">' + ICONS.phone + '</a><a href="facetime:' + tn + '" class="btn-facetime">' + ICONS.video + '</a></div>' : '') + '</div></li>';
+    return '<li class="contacte-item"><div class="contacte-info"><strong>' + esc(r.rol) + '</strong><p>' + esc(r.principal) + (r.suplent ? ' (+ ' + esc(r.suplent) + ')' : '') + '</p><small>' + esc(r.notes) + '</small></div><div>' + (t ? '<div class="btn-grup"><a href="tel:' + tn + '" class="btn-trucar">' + ICONS.phone + '</a>' + (esMobil(r.telefon) ? '<a href="facetime:' + tn + '" class="btn-facetime">' + ICONS.video + '</a>' : '') + '</div>' : '') + '</div></li>';
   }).join('');
 }
 
@@ -125,8 +147,38 @@ function renderitzarUrgencies() {
   if (!dadesApp) return;
   document.getElementById('contenidor-urgencies').innerHTML = dadesApp.protocols_urgencies.map((p, i) => {
     const cls = p.greu ? 'targeta-urgencia-greu' : 'targeta-urgencia';
-    const boto = p.greu ? '<a href="tel:112" class="btn-trucar-emergencia">TRUCAR 112</a>' : '';
-    return '<div class="' + cls + '"><h3>' + (i + 1) + '. ' + esc(p.situacio) + '</h3><ol class="passos-urgencia"><li>' + esc(p.pas1) + '</li><li>' + esc(p.pas2) + '</li></ol><p><strong>Responsable:</strong> ' + esc(p.responsable) + '</p><div>' + boto + '</div></div>';
+
+    const passos = (p.passos || []).map(pas => {
+      let btn = '';
+      if (pas.tel) {
+        const tn = netejarTel(pas.tel);
+        btn = ' <a href="tel:' + tn + '" class="btn-trucar-pas">' + ICONS.phone + ' ' + esc(pas.tel) + '</a>';
+      } else if (pas.ref === 'empresa_cuidadora') {
+        const ec = dadesApp.empresa_cuidadora;
+        if (ec && ec.telefon && !ec.telefon.includes('PENDENT')) {
+          const tn = netejarTel(ec.telefon);
+          btn = ' <a href="tel:' + tn + '" class="btn-trucar-pas">' + ICONS.phone + ' ' + esc(ec.nom || ec.telefon) + '</a>';
+        }
+      }
+      return '<li>' + esc(pas.text) + btn + '</li>';
+    }).join('');
+
+    const responsables = (p.responsables || []).map(nom => {
+      const tel = trobarTelefon(nom);
+      if (tel) {
+        return '<a href="tel:' + netejarTel(tel) + '" class="btn-responsable">' + ICONS.phone + ' ' + esc(nom) + '</a>';
+      }
+      return '<span class="responsable-nom">' + esc(nom) + '</span>';
+    }).join('');
+
+    const boto112 = p.greu ? '<a href="tel:112" class="btn-trucar-emergencia">TRUCAR 112</a>' : '';
+
+    return '<div class="' + cls + '">' +
+      '<h3>' + (i + 1) + '. ' + esc(p.situacio) + '</h3>' +
+      '<ol class="passos-urgencia">' + passos + '</ol>' +
+      (responsables ? '<div class="responsables-urgencia">' + responsables + '</div>' : '') +
+      (boto112 ? '<div style="margin-top:.5rem">' + boto112 + '</div>' : '') +
+      '</div>';
   }).join('');
 }
 
@@ -187,6 +239,13 @@ function renderitzarConfiguracio() {
     '<div class="guia-item"><strong>Urgències</strong> — Protocols pas a pas. Botó vermell truca al 112</div>' +
     '<div class="guia-item"><strong>Medicació</strong> — Llista completa amb dosis, horaris i alertes</div>' +
     '<div class="guia-item"><strong>Config</strong> — Editor de dades, backup i guies</div>',
+    false
+  );
+
+  h += seccioConfigurable('Crèdits',
+    '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem"><strong>Cuida</strong> és una webapp dissenyada i creada per <a href="https://linuxbcn.cat" target="_blank" style="color:#222">LinuxBCN.cat</a> a partir d\'una necessitat real de coordinació familiar per a la cura de malalts a casa.</p>' +
+    '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem">El codi és obert. Si vols adaptar-la per a la teva situació, pots accedir al repositori a GitHub: <a href="https://github.com/112books/cuida" target="_blank" style="color:#222">github.com/112books/cuida</a>. De bon grat t\'ajudem.</p>' +
+    '<p style="font-size:.75rem;color:#999">Llicència MIT · 2026 · <a href="https://linuxbcn.cat" target="_blank" style="color:#999">linuxbcn.cat</a></p>',
     false
   );
 

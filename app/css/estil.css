@@ -99,3 +99,9 @@ body>header{padding:1rem 1rem .5rem;position:sticky;top:0;z-index:100;background
 .cuidador-horari{font-size:.78rem;color:#1a5f4a;background:#e8f5e9;padding:.1rem .4rem;border-radius:4px;display:inline-block;width:fit-content}
 .cuidador-tel{font-size:.72rem;color:#999}
 .aviso-sol{background:#fff3cd;border-radius:8px;padding:.75rem 1rem;font-size:.82rem;color:#856404;line-height:1.5}
+.btn-trucar-pas{display:inline-flex;align-items:center;gap:.25rem;background:#222;color:#fff;text-decoration:none;border-radius:4px;padding:.15rem .4rem;font-size:.7rem;vertical-align:middle;margin-left:.3rem}
+.btn-trucar-pas .icn-sm{width:.75rem;height:.75rem;stroke:#fff}
+.responsables-urgencia{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.btn-responsable{display:inline-flex;align-items:center;gap:.25rem;background:#e0e0e0;color:#1a1a1a;text-decoration:none;border-radius:20px;padding:.3rem .65rem;font-size:.75rem}
+.btn-responsable .icn-sm{width:.75rem;height:.75rem}
+.responsable-nom{font-size:.75rem;color:#999;padding:.3rem .2rem}
