@@ -1,19 +1,26 @@
 # CLAUDE.md — Guia del projecte Cuida
 
-## ESTAT ACTUAL (10 maig 2026)
+## ESTAT ACTUAL (10 maig 2026) — Beta 1 tancada ✓
 
 App PWA per coordinar cura del Joan (cardiorespiratori, oxigen, morfina, PADES).
-**Codi implementat per a Cloudflare KV — pendent de setup manual al dashboard de Cloudflare.**
-Veure `PER_REPRENDRE.md` per als passos exactes.
+**Beta 1 tancada i etiquetada `v1.0-beta` als dos repos. Cloudflare KV pendent de setup.**
 
 ### Repositoris i desplegament
 
-- **Public**: `112books/cuida` (plantilla buida, indexable)
-- **Privat**: `112books/cuida-avi-joan` (dades reals, noindex)
+- **Públic**: `112books/cuida` (plantilla buida, indexable, `v1.0-beta`)
+- **Privat**: `112books/cuida-avi-joan` (dades reals del Joan, `v1.0-beta`)
 - **Live**: https://cuida-avi-joan.pages.dev/ (Cloudflare Pages)
 - Build output: `app/`, sense build command
 - Password client-side (login): "peidro" — també és `CUIDA_PASSWORD` al KV
-- Desplegament automatic via `git push private main`
+- Desplegament automàtic via `git push private main`
+- Remots: `origin` = públic, `private` = privat (Cloudflare)
+
+### Estat dels repos
+
+- **`main` local** = privat amb dades reals del Joan
+- **`origin/main`** = plantilla buida per a ús públic (sense dades, sense foto, sense docs interns)
+- Per desplegar al públic: crear branca `public-beta1`, fer neteja, force push a `origin/main`
+- **NO fer `git push origin main` directament** — sobreescriuria amb dades privades
 
 ### Flux de dades (amb KV actiu)
 
@@ -30,57 +37,66 @@ Veure `PER_REPRENDRE.md` per als passos exactes.
 - Variable d'entorn: `CUIDA_PASSWORD` (Secret a Cloudflare Pages Settings)
 - **IMPORTANT:** com que el publish dir és `app/`, les functions van a `app/functions/`, NO a l'arrel del repo
 
+### Setup Cloudflare KV (PENDENT — 5-10 min)
+
+1. Dashboard → Workers & Pages → KV → Create namespace → Nom: `CUIDA_DADES`
+2. Pages → cuida-avi-joan → Settings → Environment variables → Secret: `CUIDA_PASSWORD` = "peidro"
+3. Pages → Settings → Functions → KV namespace bindings → Variable: `CUIDA_DADES`
+4. `git push private main` → redesplegament automàtic
+5. Verificació: obrir `/api/dades` al navegador — hauries de veure JSON
+
 ### Model de dades (`app/js/dades.js`)
 
-`DADES_INICIALS` conte: pacient (nom, situacio, telefon, foto, nota),
+`DADES_INICIALS` conté: pacient (nom, situacio, telefon, foto, nota),
 contactes_medics (rol, nom, telefon, notes, prioritat),
 proveidors (nom, telefon, notes),
 rols_familiars (rol, principal, suplent, telefon, notes),
-medicacio (16 farmacs: nom, dosi, horari, via, per_a_que, notes),
-**empresa_cuidadora (nom, telefon, responsable)** — NOU,
-**cuidadors (nom, telefon, horari)** — NOU (array),
+medicacio (17 fàrmacs: nom, dosi, horari, via, per_a_que, notes),
+empresa_cuidadora (nom, telefon, responsable),
+cuidadors (nom, telefon, horari) — array,
 voluntats_anticipades, protocols_urgencies, pla_avia,
 indicadors_desgast, graella (fase, escenari, cuidadora, ical).
 
-`PLANTILLA_BUIDA` = versio buida per al repositori public.
+`PLANTILLA_BUIDA` = versió buida per al repositori públic.
+Al repo públic: `const DADES_INICIALS = PLANTILLA_BUIDA;`
 
 ### Fitxers clau
 
 - `app/functions/api/dades.js` — Pages Function backend KV (GET/POST)
-- `app/js/dades.js` — dades inicials i fallback offline (font de veritat si KV buit)
-- `app/js/main.js` — logica: renderitzarX(), formulari edicio, carregarDades() async
-- `app/js/calendari.js` — graella cuidadors (Calendari.generarGraellaHTML(dades) sense escenari)
-- `app/js/emmagatzematge.js` — export JSON + carregarRemot() + guardarRemot()
-- `app/index.html` — 6 vistes (Inici, Graella, Contactes, Urgencies, Medicacio, Config)
-- `app/css/estil.css` — disseny zen grisos + estils formulari edicio
-- `app/service-worker.js` — cache v3, exclou /api/ del cache
-- `app/imatges/avi-joan.png` — foto del pacient (URL relativa)
-- `app/icones/icon-192.png`, `icon-512.png` — icones PWA placeholder
+- `app/js/dades.js` — dades inicials i fallback offline
+- `app/js/main.js` — lògica: renderitzarX(), formulari edició, carregarDades() async
+- `app/js/calendari.js` — graella cuidadors
+- `app/js/emmagatzematge.js` — export/import JSON
+- `app/index.html` — 6 vistes (Inici, Graella, Contactes, Urgències, Medicació, Config)
+- `app/css/estil.css` — disseny zen grisos
+- `app/service-worker.js` — cache v3, exclou /api/
+- `app/imatges/avi-joan.png` — foto del pacient (NOMÉS al repo privat)
 
 ### Disseny
 
 - Grisos: fons #f5f5f5, targetes #fff, text #1a1a1a, accents #222
-- Vermell #d9534f nomes a urgències i alertes
-- Header "LinuxBCN — **Cuida**" centrat, sense fons
-- Navegacio inferior fixa amb icones SVG inline
-- Mobile-first, sense dependencies externes
+- Vermell #d9534f només a urgències i alertes
+- Pastilles d'estat: verd `.estat-ok`, taronja `.estat-revisar`, vermell `.estat-critic`
+- Header "LinuxBCN — **Cuida**" centrat, tipografia IBM Plex Mono
+- Navegació inferior fixa amb icones SVG inline
+- Mobile-first, sense dependències externes
 
-### Funcionalitats
+### Funcionalitats (Beta 1)
 
-- Inici: foto pacient, dades, avisos, accions rapides (export/import)
-- Graella: escenari A/B amb colors (cuidadora verd, familia lila)
-- Contactes: "Cuidadors externs" + "Proveidors" + "Familia", botons tel/facetime per cada numero
-- Urgencies: protocols pas a pas, boto vermell truca 112
-- Medicacio: 16 farmacs amb dosi, horari, alertes
-- Config: perfils (buida/avi_joan), guia, export/import
+- Inici: foto pacient, pastilla estat (verd/taronja/vermell), accions ràpides
+- Graella: horari setmanal cuidadors amb colors
+- Contactes: empresa, cuidadors, metges, proveïdors, família — botons tel/FaceTime
+- Urgències: protocols pas a pas, botó vermell truca 112
+- Medicació: 17 fàrmacs amb dosi, horari, alertes
+- Config: editor de dades (formulari), guia, export/import JSON, guia Cloudflare
 
-### PENDENTS
+### PENDENTS per a properes versions
 
-- **Setup Cloudflare KV** (veure PER_REPRENDRE.md — 5-10 min, manual al dashboard)
-- Telèfon cardiòleg i proveïdors (farmacia, oxigen, queviures, empresa cuidadores) — editable ara via formulari
-- DVA (voluntats anticipades) — verificar si existeix
+- **Setup Cloudflare KV** (5-10 min al dashboard, veure passos amunt)
+- Telèfon Teleassistència (editable via formulari a Config)
+- DVA (voluntats anticipades) — verificar si existeix document físic
 - Domini `cuida.linuxbcn.cat` a Cloudflare (cal afegir linuxbcn.cat al compte)
-- Icones reals (ara placeholders verds)
+- Icones PWA reals (ara placeholders)
 
 ### Com es treballa
 
@@ -88,56 +104,26 @@ indicadors_desgast, graella (fase, escenari, cuidadora, ical).
 cd /Users/joan/Documents/Obsidian/cuida.linuxbcn.cat
 # Local:
 cd app && python3 -m http.server 8080
-# Desplegar:
+# Desplegar al privat (Cloudflare):
 git add -A && git commit -m "missatge" && git push private main
-# Remots: origin = public, private = privat (Cloudflare)
+# Actualitzar repo públic (amb branca de neteja):
+git checkout -b public-beta1
+# ... fer neteja de dades ...
+git push origin public-beta1:main --force
+git checkout main && git branch -D public-beta1
 ```
-
-## PROPOSTES PER AL FUTUR (backend per editar des del mobil)
-
-### Opcio 1: Editar a GitHub directament (ara)
-Anar a github.com/112books/cuida-avi-joan → editar `dades.js` (llapis) →
-commit → deploy automatic. Funciona des del mobil.
-Requereix saber JSON.
-
-### Opcio 2: Cloudflare Function + GitHub API
-Afegeix una Cloudflare Function que fa de pont entre l'app i GitHub.
-**Setup (un cop):**
-1. Crear un Personal Access Token a GitHub Settings → Developer settings
-   → Tokens (classic, repositori privat)
-2. Afegir el token com a variable secreta a Cloudflare Pages
-   (Settings → Environment variables)
-
-**Implementacio:**
-- `app/api/guardar.js` (Cloudflare Function) que:
-  - Rep POST amb les dades i la contrasenya
-  - Valida la contrasenya
-  - Fa fetch a GitHub API per actualitzar `dades.js` o un `dades.json`
-- Boto "Guardar a GitHub" a Config, protegit amb la contrasenya actual
-
-**Avantatges:** edicio des de l'app al mobil, tots reben les dades
-**Inconvenients:** cal token + Function setup, mes complexitat
-
-### Opcio 3: Cloudflare D1 (base de dades)
-- Dades a Cloudflare D1 (SQLite serverless)
-- CRUD via Cloudflare Functions
-- Mes escalable pero mes complex
-- No recomanat per aquest projecte (overkill)
-
-### Recomanacio
-Comencar amb Opcio 1 (ja funciona).
-Si es vol edicio des de l'app, implementar Opcio 2 (1-2 hores).
 
 ## NOTES PER A LA IA
 
-- Codi en catala
-- Funcions: renderitzarX()
-- Sense dependencies externes
-- Service worker: cache v3, actualitzar `CACHE` i FILES si s'afegeixen fitxers nous estatics
-- No usar localStorage per dades d'usuari — les dades van a Cloudflare KV via /api/dades
-- `esc()` definida a main.js, NO a calendari.js
-- `netejarTel()` treu espais i guions dels telefonos
-- Contrasenya "peidro": login client-side (index.html) + CUIDA_PASSWORD al Cloudflare (KV write)
-- `carregarDades()` es async — qualsevol cosa que en depengui ha d'esperar await
+- Codi en català
+- Funcions: `renderitzarX()`
+- Sense dependències externes
+- Service worker: cache v3 — actualitzar `CACHE_NOM` i `FILES` si s'afegeixen fitxers nous
+- No usar localStorage — les dades van a Cloudflare KV via `/api/dades`
+- `esc()` definida a `main.js`, NO a `calendari.js`
+- `netejarTel()` treu espais i guions dels telèfons
+- Contrasenya "peidro": login client-side (`index.html`) + `CUIDA_PASSWORD` a Cloudflare (KV write)
+- `carregarDades()` és async — qualsevol cosa que en depengui ha d'esperar `await`
 - `Calendari.generarGraellaHTML(dades)` — un sol argument, sense escenari
 - `seccioConfigurable(t, c, obert)` — tercer argument booleà per controlar si s'obre per defecte
+- Pastilla estat a `#estat-general`, llista detall a `#llista-avisos` (hidden quan tot ok)
