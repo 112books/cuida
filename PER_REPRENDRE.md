@@ -10,37 +10,34 @@ Tot el codi està implementat i commitejat. Queda ÚNICAMENT el setup manual a C
 - Nous camps: empresa_cuidadora, cuidadors
 - Service worker v3 (exclou /api/ del cache)
 
-## 🔴 PENDENT — Setup manual a Cloudflare (5-10 min)
+## 🔴 PENDENT — Setup (sense dades bancàries)
 
-### Pas 1 — Crear KV namespace
+### Pas 1 — Crear token de GitHub (5 min)
+1. Ves a https://github.com/settings/tokens
+2. **Generate new token → Generate new token (classic)**
+3. Nom: `cuida-app`
+4. Expiració: **No expiration** (o 1 any)
+5. Scope: marca **`repo`** (accés complet als repositoris privats)
+6. **Generate token** → copia el token (només es veu un cop!)
+
+### Pas 2 — Afegir variables a Cloudflare Pages (gratuït, sense bank)
 1. Ves a https://dash.cloudflare.com
-2. **Workers & Pages → KV → Create namespace**
-3. Nom: `CUIDA_DADES`
-4. Guarda l'ID (el necessitaràs al Pas 3)
+2. **Workers & Pages → Pages → cuida-avi-joan**
+3. **Settings → Environment variables → Add variable**
+4. Afegeix aquestes dues variables (tipus **Secret** les dues):
+   - Nom: `GITHUB_TOKEN` · Valor: *el token del Pas 1*
+   - Nom: `CUIDA_PASSWORD` · Valor: `peidro`
+5. Aplica a **Production** i **Preview**
+6. Desa
 
-### Pas 2 — Variable de contrasenya
-1. **Workers & Pages → Pages → cuida-avi-joan**
-2. **Settings → Environment variables → Add variable**
-3. Tipus: **Secret** (important!)
-4. Nom: `CUIDA_PASSWORD`
-5. Valor: `peidro`
-6. Aplica a **Production** i **Preview**
-
-### Pas 3 — Lligar KV al projecte
-1. Al mateix projecte Pages → **Settings → Functions**
-2. A **KV namespace bindings** → **Add binding**
-3. Variable name: `CUIDA_DADES`
-4. KV namespace: selecciona `CUIDA_DADES` (creat al Pas 1)
-5. Desa
-
-### Pas 4 — Desplegar
+### Pas 3 — Desplegar
 ```bash
 cd /Users/joan/Documents/Obsidian/cuida.linuxbcn.cat
 git push private main
 ```
 
-### Pas 5 — Verificació (30-60s després del push)
-1. Obre https://cuida-avi-joan.pages.dev/api/dades → ha de mostrar `{"buit":true}`
+### Pas 4 — Verificació (30-60s després del push)
+1. Obre https://cuida-avi-joan.pages.dev/api/dades → ha de mostrar el JSON de les dades
 2. Obre l'app → Config → Editar dades → contrasenya "peidro"
 3. Modifica alguna cosa → Guardar a Cloudflare → missatge d'èxit
 4. Recarrega → el canvi es manté ✓
