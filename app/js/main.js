@@ -84,16 +84,24 @@ function renderitzarInici() {
   document.getElementById('tel-pacient').innerHTML = tel ? '<a href="tel:' + tel + '" class="btn-trucar">' + ICONS.phone + ' Trucar al pacient</a>' : '';
   const f = document.getElementById('pacient-foto');
   f.innerHTML = p.foto ? '<img src="' + esc(p.foto) + '" alt="Foto del pacient" class="foto-pacient">' : '<div class="foto-pacient-placeholder">' + ICONS.user + '</div>';
-  const avisos = [];
-  if (dadesApp.contactes_medics.some(c => c.nom.includes('PENDENT') || !c.nom)) avisos.push('Contactes mèdics pendents');
-  if (dadesApp.voluntats_anticipades.existeix.includes('PENDENT') || !dadesApp.voluntats_anticipades.existeix) avisos.push('DVA pendent de verificar');
-  if (dadesApp.medicacio.some(m => m.dosi.includes('PENDENT') || !m.dosi)) avisos.push('Medicació pendent de revisar');
-  if (dadesApp.proveidors && dadesApp.proveidors.some(p => p.telefon.includes('PENDENT') || !p.telefon)) avisos.push('Proveïdors pendents de contactar');
-  if (dadesApp.empresa_cuidadora && dadesApp.empresa_cuidadora.telefon.includes('PENDENT')) avisos.push('Empresa cuidadora pendent de contactar');
-  if (!p.nom) avisos.push('Dades del pacient buides');
-  document.getElementById('llista-avisos').innerHTML = avisos.length
-    ? avisos.map(a => '<li class="aviso-item">' + a + '</li>').join('')
-    : '<li class="aviso-item ok">Tot en ordre</li>';
+  const critics = [];
+  const revisar = [];
+  if (!p.nom) critics.push('Dades del pacient buides');
+  if (dadesApp.contactes_medics.some(c => !c.nom)) critics.push('Contactes mèdics sense nom');
+  else if (dadesApp.contactes_medics.some(c => c.nom.includes('PENDENT'))) revisar.push('Contactes mèdics pendents');
+  if (dadesApp.medicacio.some(m => !m.dosi)) critics.push('Medicació sense dosi definida');
+  else if (dadesApp.medicacio.some(m => m.dosi.includes('PENDENT'))) revisar.push('Medicació pendent de revisar');
+  if (!dadesApp.voluntats_anticipades.existeix || dadesApp.voluntats_anticipades.existeix.includes('PENDENT')) revisar.push('DVA pendent de verificar');
+  if (dadesApp.proveidors && dadesApp.proveidors.some(pr => !pr.telefon || pr.telefon.includes('PENDENT'))) revisar.push('Proveïdors pendents de contactar');
+  if (dadesApp.empresa_cuidadora && dadesApp.empresa_cuidadora.telefon.includes('PENDENT')) revisar.push('Empresa cuidadora pendent de contactar');
+  let pillText, pillClass;
+  if (critics.length) { pillText = 'Falta informació important'; pillClass = 'estat-critic'; }
+  else if (revisar.length) { pillText = 'Cal revisar'; pillClass = 'estat-revisar'; }
+  else { pillText = 'Tot d\'acord'; pillClass = 'estat-ok'; }
+  const tots = critics.concat(revisar);
+  document.getElementById('estat-general').innerHTML = '<span class="estat-pill ' + pillClass + '">' + pillText + '</span>';
+  document.getElementById('llista-avisos').innerHTML = tots.map(a => '<li class="aviso-item">' + a + '</li>').join('');
+  document.getElementById('llista-avisos').style.display = tots.length ? '' : 'none';
 }
 
 function renderitzarContactes() {
