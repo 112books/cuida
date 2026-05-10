@@ -14,7 +14,7 @@ function ghHeaders(token) {
 export async function onRequest(context) {
   const { request, env } = context;
   const headers = {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
     'Access-Control-Allow-Origin': '*',
   };
