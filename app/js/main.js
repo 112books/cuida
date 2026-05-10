@@ -243,9 +243,10 @@ function renderitzarConfiguracio() {
   );
 
   h += seccioConfigurable('Crèdits',
-    '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem"><strong>Cuida</strong> és una webapp dissenyada i creada per <a href="https://linuxbcn.cat" target="_blank" style="color:#222">LinuxBCN.cat</a> a partir d\'una necessitat real de coordinació familiar per a la cura de malalts a casa.</p>' +
-    '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem">El codi és obert. Si vols adaptar-la per a la teva situació, pots accedir al repositori a GitHub: <a href="https://github.com/112books/cuida" target="_blank" style="color:#222">github.com/112books/cuida</a>. De bon grat t\'ajudem.</p>' +
-    '<p style="font-size:.75rem;color:#999">Llicència MIT · 2026 · <a href="https://linuxbcn.cat" target="_blank" style="color:#999">linuxbcn.cat</a></p>',
+    '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem"><strong>Cuida Beta 01</strong> — Webapp de coordinació familiar per a malalts a casa. Dissenyada i creada per <a href="https://linuxbcn.com/ca/" target="_blank" style="color:#222">LinuxBCN.cat</a> a partir d\'una necessitat real.</p>' +
+    '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem">→ <a href="https://linuxbcn.com/ca/cuida/" target="_blank" style="color:#222">Llegir l\'article complet a linuxbcn.com</a></p>' +
+    '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem">El codi és obert (MIT). Per adaptar-la per a la teva família: <a href="https://github.com/112books/cuida" target="_blank" style="color:#222">github.com/112books/cuida</a>. De bon grat t\'ajudem.</p>' +
+    '<p style="font-size:.75rem;color:#999">Llicència MIT · 2026 · <a href="https://linuxbcn.com/ca/" target="_blank" style="color:#999">linuxbcn.com</a></p>',
     false
   );
 
