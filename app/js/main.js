@@ -105,6 +105,13 @@ function renderitzarInici() {
 
   const ox = dadesApp.oxigen || {};
   const fluxText = ox.flux !== undefined && ox.flux !== '' ? String(ox.flux) + ' l/min' : 'No especificat';
+  const tasques = dadesApp.tasques_cuidadora || [];
+  document.getElementById('inici-tasques').innerHTML = tasques.filter(t => t).length
+    ? '<div class="targeta"><h3>Recordatori diari cuidadora</h3><ul class="llista-tasques">' +
+      tasques.filter(t => t).map(t => '<li class="tasca-item">' + esc(t) + '</li>').join('') +
+      '</ul></div>'
+    : '';
+
   document.getElementById('inici-oxigen').innerHTML =
     '<div class="targeta targeta-oxigen">' +
     '<h3>Oxigen continu</h3>' +
@@ -382,6 +389,13 @@ function renderitzarFormulariEdicio() {
   h += '</div>';
   h += '<button class="btn-secundari btn-afegir" onclick="afegirMedicament()">' + ICONS.plus + ' Afegir medicament</button>';
 
+  // Tasques cuidadora
+  h += '<h3 class="form-seccio-titol">Recordatori diari cuidadora</h3>';
+  h += '<div id="f-tasques">';
+  (d.tasques_cuidadora || []).forEach((t, i) => { h += itemTascaHTML(t, i); });
+  h += '</div>';
+  h += '<button class="btn-secundari btn-afegir" onclick="afegirTasca()">' + ICONS.plus + ' Afegir tasca</button>';
+
   // Oxigen
   const ox = d.oxigen || {};
   h += '<h3 class="form-seccio-titol">Oxigen</h3>';
@@ -481,6 +495,19 @@ function afegirFamilia() {
   cnt.insertAdjacentHTML('beforeend', itemFamiliaHTML({ rol: '', principal: '', telefon: '', notes: '' }, i));
 }
 
+function itemTascaHTML(t, i) {
+  return '<div class="item-llista" id="tasca-' + i + '">' +
+    '<button class="btn-eliminar-item" onclick="eliminarItem(\'f-tasques\',\'tasca-' + i + '\')" title="Eliminar">' + ICONS.trash + '</button>' +
+    '<div class="camp"><input type="text" class="tasca-text" value="' + esc(t || '') + '" placeholder="Descripció de la tasca"></div>' +
+    '</div>';
+}
+
+function afegirTasca() {
+  const cnt = document.getElementById('f-tasques');
+  const i = cnt.children.length;
+  cnt.insertAdjacentHTML('beforeend', itemTascaHTML('', i));
+}
+
 function afegirMedicament() {
   const cnt = document.getElementById('f-medicacio');
   const i = cnt.children.length;
@@ -539,6 +566,10 @@ function recollirDadesFormulari() {
     notes: (el.querySelector('.med-notes') || {}).value || '',
     moment: (el.querySelector('.med-moment') || {}).value || '',
   }));
+
+  dades.tasques_cuidadora = Array.from(document.querySelectorAll('#f-tasques .item-llista'))
+    .map(el => (el.querySelector('.tasca-text') || {}).value || '')
+    .filter(t => t);
 
   dades.oxigen = {
     flux: get('f-oxigen-flux'),
