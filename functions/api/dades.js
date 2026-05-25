@@ -11,6 +11,15 @@ function ghHeaders(token) {
   };
 }
 
+function timingSafeEqual(a, b) {
+  const enc = new TextEncoder();
+  const ta = enc.encode(a.padEnd(128));
+  const tb = enc.encode(b.padEnd(128));
+  let diff = ta.length !== tb.length ? 1 : 0;
+  for (let i = 0; i < ta.length; i++) diff |= ta[i] ^ tb[i];
+  return diff === 0;
+}
+
 const ALLOWED_ORIGINS = [
   'https://cuida-avi-joan.pages.dev',
   'https://cuida.linuxbcn.cat',
@@ -51,7 +60,7 @@ export async function onRequest(context) {
       if (!request.headers.get('Content-Type')?.includes('application/json'))
         return new Response(JSON.stringify({ error: 'Content-Type invàlid' }), { status: 415, headers });
       const body = await request.json();
-      if (!body.password || body.password !== env.CUIDA_PASSWORD) {
+      if (!body.password || !timingSafeEqual(body.password, env.CUIDA_PASSWORD)) {
         return new Response(JSON.stringify({ error: 'Contrasenya incorrecta' }), { status: 401, headers });
       }
 
