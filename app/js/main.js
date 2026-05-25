@@ -209,8 +209,8 @@ function renderitzarUrgencies() {
 
 function renderitzarMedicacio() {
   if (!dadesApp) return;
-  const grups = { esmorzar: [], dinar: [], sopar: [], altres: [] };
-  const etiquetes = { esmorzar: 'Esmorzar', dinar: 'Dinar', sopar: 'Sopar', altres: 'Puntual' };
+  const grups = { esmorzar: [], dinar: [], sopar: [], altres: [], continu: [] };
+  const etiquetes = { esmorzar: 'Matí', dinar: 'Migdia', sopar: 'Nit', altres: 'Puntual', continu: 'Altres' };
   dadesApp.medicacio.forEach(m => {
     const k = grups[m.moment] ? m.moment : 'altres';
     grups[k].push(m);
@@ -218,7 +218,7 @@ function renderitzarMedicacio() {
 
   // Grups simplificats (resum per a la cuidadora)
   let html = '';
-  for (const key of ['esmorzar', 'dinar', 'sopar', 'altres']) {
+  for (const key of ['esmorzar', 'dinar', 'sopar', 'altres', 'continu']) {
     if (!grups[key].length) continue;
     html += '<h3 class="grup-medicacio-titol">' + etiquetes[key] + '</h3>';
     html += '<div class="grup-medicacio">';
@@ -470,10 +470,11 @@ function itemMedicacioHTML(m, i) {
     '<div class="camp"><label>Dosi</label><input type="text" class="med-dosi" value="' + esc(m.dosi || '') + '"></div>' +
     '<div class="camp"><label>Moment del dia</label><select class="med-moment">' +
     '<option value=""' + (!m.moment ? ' selected' : '') + '>Selecciona...</option>' +
-    '<option value="esmorzar"' + (m.moment === 'esmorzar' ? ' selected' : '') + '>Esmorzar</option>' +
-    '<option value="dinar"' + (m.moment === 'dinar' ? ' selected' : '') + '>Dinar</option>' +
-    '<option value="sopar"' + (m.moment === 'sopar' ? ' selected' : '') + '>Sopar</option>' +
+    '<option value="esmorzar"' + (m.moment === 'esmorzar' ? ' selected' : '') + '>Matí</option>' +
+    '<option value="dinar"' + (m.moment === 'dinar' ? ' selected' : '') + '>Migdia</option>' +
+    '<option value="sopar"' + (m.moment === 'sopar' ? ' selected' : '') + '>Nit</option>' +
     '<option value="altres"' + (m.moment === 'altres' ? ' selected' : '') + '>Puntual</option>' +
+    '<option value="continu"' + (m.moment === 'continu' ? ' selected' : '') + '>Continu / 24h</option>' +
     '</select></div>' +
     '<div class="camp"><label>Horari / Pauta</label><input type="text" class="med-horari" value="' + esc(m.horari || '') + '"></div>' +
     '<div class="camp"><label>Via</label><input type="text" class="med-via" value="' + esc(m.via || '') + '"></div>' +
