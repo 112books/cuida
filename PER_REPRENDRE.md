@@ -26,7 +26,7 @@ Tot el codi està implementat i commitejat. Queda ÚNICAMENT el setup manual a C
 3. **Settings → Environment variables → Add variable**
 4. Afegeix aquestes dues variables (tipus **Secret** les dues):
    - Nom: `GITHUB_TOKEN` · Valor: *el token del Pas 1*
-   - Nom: `CUIDA_PASSWORD` · Valor: `peidro`
+   - Nom: `CUIDA_PASSWORD` · Valor: *la contrasenya de l'app*
 5. Aplica a **Production** i **Preview**
 6. Desa
 
@@ -38,7 +38,7 @@ git push private main
 
 ### Pas 4 — Verificació (30-60s després del push)
 1. Obre https://cuida-avi-joan.pages.dev/api/dades → ha de mostrar el JSON de les dades
-2. Obre l'app → Config → Editar dades → contrasenya "peidro"
+2. Obre l'app → Config → Editar dades → introdueix la contrasenya configurada
 3. Modifica alguna cosa → Guardar a Cloudflare → missatge d'èxit
 4. Recarrega → el canvi es manté ✓
 5. Obre en un altre dispositiu → veu el canvi ✓

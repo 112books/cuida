@@ -11,7 +11,7 @@ Backend: **GitHub API** (llegeix/escriu `app/dades.json` al repo privat via Clou
 - **Privat**: `112books/cuida-avi-joan` (dades reals del Joan, en producció)
 - **Live**: https://cuida-avi-joan.pages.dev/ (Cloudflare Pages)
 - Build output: `app/`, sense build command
-- Password client-side (login): "peidro" — també és `CUIDA_PASSWORD` a Cloudflare Pages Settings
+- Password client-side (login): valor configurat a `CUIDA_PASSWORD` a Cloudflare Pages Settings
 - Desplegament automàtic via `git push private main`
 - Remots: `origin` = públic, `private` = privat (Cloudflare)
 
@@ -40,7 +40,7 @@ Backend: **GitHub API** (llegeix/escriu `app/dades.json` al repo privat via Clou
 - POST → valida `CUIDA_PASSWORD`, obté SHA actual, escriu nou JSON via GitHub PUT
 - Variables d'entorn necessàries a Cloudflare Pages Settings:
   - `GITHUB_TOKEN` — token GitHub amb permisos `repo` (read/write)
-  - `CUIDA_PASSWORD` — contrasenya d'escriptura (= "peidro")
+  - `CUIDA_PASSWORD` — contrasenya d'escriptura (configurar al dashboard de Cloudflare)
 
 ### Model de dades (`app/js/dades.js`)
 
@@ -127,7 +127,7 @@ git checkout main && git branch -D public-sync
 - Service worker: **cache v6** — actualitzar `CACHE` i `FILES` si s'afegeixen fitxers nous
 - `esc()` definida a `main.js`, NO a `calendari.js`
 - `netejarTel()` treu espais i guions dels telèfons
-- Contrasenya "peidro": login client-side (`index.html`) + `CUIDA_PASSWORD` a Cloudflare (API write)
+- Contrasenya: login client-side (`index.html`) + `CUIDA_PASSWORD` a Cloudflare (API write) — valor MAI als fitxers de codi
 - `carregarDades()` és async — qualsevol cosa que en depengui ha d'esperar `await`
 - `Calendari.generarGraellaHTML(dades)` — un sol argument, sense escenari
 - `seccioConfigurable(t, c, obert)` — tercer argument booleà per controlar si s'obre per defecte

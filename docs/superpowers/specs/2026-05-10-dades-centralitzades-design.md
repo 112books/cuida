@@ -150,7 +150,7 @@ El camp `horari` és text lliure (ex: "dl-ds 9-12h i 16-19h") — el renderitzad
 2. **Settings** → **Environment variables**
 3. Afegeix una variable de tipus **Secret**:
    - Nom: `CUIDA_PASSWORD`
-   - Valor: `peidro` (o la contrasenya que vulguis)
+   - Valor: *la contrasenya que vulguis* (mai la poses als fitxers del repo)
 4. Desa els canvis
 
 ### Pas 3: Lligar el KV al projecte
