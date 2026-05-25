@@ -10,3 +10,6 @@ Thumbs.db
 *.swo
 *.log
 config.local.js
+app/dades.json
+.env
+.env.*

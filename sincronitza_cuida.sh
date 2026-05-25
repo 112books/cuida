@@ -1,12 +1,17 @@
 #!/bin/bash
-# Cuida - Sincronització GitHub
+# Cuida - Sincronització GitHub (repo PRIVAT)
 set -e
-REPO="https://github.com/LinuxBCN/cuida.git"
-echo "💚 Cuida - Sincronització GitHub"
+echo "💚 Cuida - Sincronització GitHub (privat)"
 command -v git >/dev/null || { echo "❌ Git no instal·lat"; exit 1; }
-[ ! -d .git ] && { git init; git branch -M main; git remote add origin "$REPO" 2>/dev/null || git remote set-url origin "$REPO"; echo "Repo inicialitzat"; }
+[ ! -d .git ] && { echo "❌ No és un repo git"; exit 1; }
+
 git status --short
 MISSATGE="Actualització Cuida - $(date '+%Y-%m-%d %H:%M')"
-git add .
+
+# Estageja només fitxers ja seguits (exclou nous fitxers no revisats)
+git add --update
 git commit -m "$MISSATGE" 2>/dev/null && echo "✅ Commit" || echo "Sense canvis"
-git push -u origin main 2>/dev/null && echo "✅ Sincronitzat!" || echo "⚠️ No s'ha pogut fer push"
+
+# Push al repo PRIVAT (Cloudflare), mai a origin (repo públic)
+git pull private main --rebase 2>/dev/null || true
+git push private main 2>/dev/null && echo "✅ Sincronitzat a privat!" || echo "⚠️ No s'ha pogut fer push"

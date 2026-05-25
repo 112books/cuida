@@ -11,12 +11,20 @@ function ghHeaders(token) {
   };
 }
 
+const ALLOWED_ORIGINS = [
+  'https://cuida-avi-joan.pages.dev',
+  'https://cuida.linuxbcn.cat',
+];
+
 export async function onRequest(context) {
   const { request, env } = context;
+  const origin = request.headers.get('Origin') || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   const headers = {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Vary': 'Origin',
   };
 
   if (request.method === 'OPTIONS') {
@@ -38,6 +46,10 @@ export async function onRequest(context) {
 
   if (request.method === 'POST') {
     try {
+      const cl = parseInt(request.headers.get('Content-Length') || '0');
+      if (cl > 100000) return new Response(JSON.stringify({ error: 'Payload massa gran' }), { status: 413, headers });
+      if (!request.headers.get('Content-Type')?.includes('application/json'))
+        return new Response(JSON.stringify({ error: 'Content-Type invàlid' }), { status: 415, headers });
       const body = await request.json();
       if (!body.password || body.password !== env.CUIDA_PASSWORD) {
         return new Response(JSON.stringify({ error: 'Contrasenya incorrecta' }), { status: 401, headers });
@@ -59,13 +71,14 @@ export async function onRequest(context) {
       });
 
       if (!putRes.ok) {
-        const err = await putRes.json();
-        return new Response(JSON.stringify({ error: err.message || 'Error escrivint a GitHub' }), { status: 500, headers });
+        console.error('GitHub PUT error:', await putRes.text());
+        return new Response(JSON.stringify({ error: 'Error escrivint a GitHub' }), { status: 500, headers });
       }
 
       return new Response(JSON.stringify({ ok: true }), { headers });
     } catch (e) {
-      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
+      console.error('POST error:', e);
+      return new Response(JSON.stringify({ error: 'Error intern del servidor' }), { status: 500, headers });
     }
   }
 
