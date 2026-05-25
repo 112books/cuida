@@ -210,25 +210,41 @@ function renderitzarUrgencies() {
 function renderitzarMedicacio() {
   if (!dadesApp) return;
   const grups = { esmorzar: [], dinar: [], sopar: [], altres: [] };
-  const etiquetes = { esmorzar: 'Esmorzar', dinar: 'Dinar', sopar: 'Sopar', altres: 'Altres / Si cal' };
+  const etiquetes = { esmorzar: 'Esmorzar', dinar: 'Dinar', sopar: 'Sopar', altres: 'Puntual' };
   dadesApp.medicacio.forEach(m => {
     const k = grups[m.moment] ? m.moment : 'altres';
     grups[k].push(m);
   });
+
+  // Grups simplificats (resum per a la cuidadora)
   let html = '';
   for (const key of ['esmorzar', 'dinar', 'sopar', 'altres']) {
     if (!grups[key].length) continue;
-    html += '<h3 class="grup-medicacio-titol">' + etiquetes[key] + '</h3><div class="grup-medicacio">';
+    html += '<h3 class="grup-medicacio-titol">' + etiquetes[key] + '</h3>';
+    html += '<div class="grup-medicacio">';
     html += grups[key].map(m =>
-      '<div class="item-medicacio"><h3>' + esc(m.nom) + ' <small>' + esc(m.via) + '</small></h3>' +
-      '<p><strong>Dosi:</strong> ' + esc(m.dosi) + '</p>' +
-      '<p><strong>Horari:</strong> ' + esc(m.horari) + '</p>' +
-      '<p><strong>Per a qu&egrave;:</strong> ' + esc(m.per_a_que) + '</p>' +
-      (m.notes && m.notes.includes('NOMÉS') ? '<p class="alerta-medicacio">' + esc(m.notes) + '</p>' : '<small>' + esc(m.notes || '') + '</small>') +
+      '<div class="item-medicacio-resum">' +
+      '<span class="med-nom-resum">' + esc(m.nom) + '</span>' +
+      '<span class="med-dosi-resum">' + esc(m.dosi) +
+      (m.via && m.via !== 'Oral' ? ' · ' + esc(m.via) : '') + '</span>' +
       '</div>'
     ).join('');
     html += '</div>';
   }
+
+  // Fitxa completa (tots els detalls)
+  html += '<h3 class="grup-medicacio-titol" style="margin-top:1.25rem">Fitxa completa</h3>';
+  html += '<div class="grup-medicacio">';
+  html += dadesApp.medicacio.map(m =>
+    '<div class="item-medicacio"><h3>' + esc(m.nom) + ' <small>' + esc(m.via) + '</small></h3>' +
+    '<p><strong>Dosi:</strong> ' + esc(m.dosi) + '</p>' +
+    '<p><strong>Horari:</strong> ' + esc(m.horari) + '</p>' +
+    '<p><strong>Per a qu&egrave;:</strong> ' + esc(m.per_a_que) + '</p>' +
+    (m.notes && m.notes.includes('NOMÉS') ? '<p class="alerta-medicacio">' + esc(m.notes) + '</p>' : '<small>' + esc(m.notes || '') + '</small>') +
+    '</div>'
+  ).join('');
+  html += '</div>';
+
   document.getElementById('contenidor-medicacio').innerHTML = html;
 }
 
@@ -457,7 +473,7 @@ function itemMedicacioHTML(m, i) {
     '<option value="esmorzar"' + (m.moment === 'esmorzar' ? ' selected' : '') + '>Esmorzar</option>' +
     '<option value="dinar"' + (m.moment === 'dinar' ? ' selected' : '') + '>Dinar</option>' +
     '<option value="sopar"' + (m.moment === 'sopar' ? ' selected' : '') + '>Sopar</option>' +
-    '<option value="altres"' + (m.moment === 'altres' ? ' selected' : '') + '>Altres / Si cal</option>' +
+    '<option value="altres"' + (m.moment === 'altres' ? ' selected' : '') + '>Puntual</option>' +
     '</select></div>' +
     '<div class="camp"><label>Horari / Pauta</label><input type="text" class="med-horari" value="' + esc(m.horari || '') + '"></div>' +
     '<div class="camp"><label>Via</label><input type="text" class="med-via" value="' + esc(m.via || '') + '"></div>' +

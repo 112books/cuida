@@ -110,6 +110,10 @@ body>header{padding:1rem 1rem .5rem;position:sticky;top:0;z-index:100;background
 .grup-medicacio-titol{font-size:.7rem;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.06em;margin:.85rem 0 .35rem;padding-bottom:.3rem;border-bottom:1px solid #e5e5e5}
 .grup-medicacio-titol:first-child{margin-top:0}
 .grup-medicacio{background:#fff;border-radius:10px;padding:.25rem 1rem;margin-bottom:.5rem}
+.item-medicacio-resum{display:flex;justify-content:space-between;align-items:baseline;padding:.45rem 0;font-size:.82rem}
+.item-medicacio-resum+.item-medicacio-resum{border-top:1px solid #f0f0f0}
+.med-nom-resum{font-weight:600;color:#1a1a1a}
+.med-dosi-resum{font-size:.75rem;color:#666;text-align:right;flex-shrink:0;margin-left:.5rem}
 .targeta-oxigen{border-left:3px solid #b0b8c1}
 .oxigen-flux{font-size:.85rem;margin-bottom:.5rem}
 .oxigen-aviso{font-size:.78rem;background:#fff3cd;color:#7d5a00;padding:.5rem .75rem;border-radius:6px;margin:.25rem 0;line-height:1.5}
