@@ -9,7 +9,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderitzarUrgencies();
   renderitzarMedicacio();
   renderitzarGraella();
+  renderitzarDiari();
   renderitzarConfiguracio();
+  iniciarRecordatoris();
 });
 
 function canviarVista(v) {
@@ -17,6 +19,7 @@ function canviarVista(v) {
   document.getElementById('vista-' + v).classList.add('activa');
   document.querySelectorAll('.tab-nav').forEach(b => b.classList.toggle('actiu', b.dataset.vista === v));
   if (v === 'configuracio') renderitzarConfiguracio();
+  if (v === 'diari') renderitzarDiari();
 }
 
 async function carregarDades() {
@@ -262,7 +265,7 @@ function importarDades() {
     if (confirm('Importar dades de ' + (d.pacient?.nom || 'desconegut') + '?')) {
       dadesApp = d;
       perfilActual = detectarPerfil(d);
-      renderitzarInici(); renderitzarContactes(); renderitzarUrgencies(); renderitzarMedicacio(); renderitzarGraella(); renderitzarConfiguracio();
+      renderitzarInici(); renderitzarContactes(); renderitzarUrgencies(); renderitzarMedicacio(); renderitzarGraella(); renderitzarDiari(); renderitzarConfiguracio();
     }
   });
 }
@@ -297,6 +300,7 @@ function renderitzarConfiguracio() {
     '<div class="guia-item"><strong>Contactes</strong> — Empresa, cuidadors, metges, proveïdors i família amb botons de trucada</div>' +
     '<div class="guia-item"><strong>Urgències</strong> — Protocols pas a pas. Botó vermell truca al 112</div>' +
     '<div class="guia-item"><strong>Medicació</strong> — Llista completa amb dosis, horaris i alertes</div>' +
+    '<div class="guia-item"><strong>Diari</strong> — Notes diàries de seguiment amb estat i constants vitals</div>' +
     '<div class="guia-item"><strong>Config</strong> — Editor de dades, backup i guies</div>',
     false
   );
@@ -594,6 +598,236 @@ function recollirDadesFormulari() {
   };
 
   return dades;
+}
+
+// ── Diari de seguiment ──────────────────────────────────────────────────────
+
+const ESTAT_DIARI = {
+  ok: { text: 'Bé', cls: 'estat-ok' },
+  revisar: { text: 'A vigilar', cls: 'estat-revisar' },
+  critic: { text: 'Urgent', cls: 'estat-critic' },
+};
+
+let estatDiariActual = 'ok';
+let dataDiariEditant = null;
+
+function formatarDataDiari(dataStr) {
+  const d = new Date(dataStr + 'T12:00:00');
+  return d.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function renderitzarDiari() {
+  if (!dadesApp) return;
+  const diari = (dadesApp.diari || []).sort((a, b) => b.data.localeCompare(a.data));
+  const avui = new Date().toISOString().split('T')[0];
+  const entradaAvui = diari.find(e => e.data === avui);
+
+  let html = '<div class="targeta">';
+  html += '<h3>Avui &mdash; ' + esc(formatarDataDiari(avui)) + '</h3>';
+  if (entradaAvui) {
+    const ec = ESTAT_DIARI[entradaAvui.estat] || ESTAT_DIARI.ok;
+    html += '<span class="estat-pill ' + ec.cls + '">' + ec.text + '</span>';
+    if (entradaAvui.text) html += '<p class="entrada-diari-text">' + esc(entradaAvui.text) + '</p>';
+    const c = entradaAvui.constants || {};
+    if (c.tensio || c.saturacio || c.pes) {
+      html += '<div class="entrada-constants">';
+      if (c.tensio) html += '<span class="constant-item">TA: ' + esc(c.tensio) + '</span>';
+      if (c.saturacio) html += '<span class="constant-item">SpO₂: ' + esc(c.saturacio) + '%</span>';
+      if (c.pes) html += '<span class="constant-item">Pes: ' + esc(c.pes) + ' kg</span>';
+      html += '</div>';
+    }
+    html += '<div style="margin-top:.6rem"><button class="btn-secundari" onclick="obrirFormDiari(\'' + avui + '\')">' + ICONS.edit + ' Editar</button></div>';
+  } else {
+    html += '<p style="font-size:.82rem;color:#999;margin:.35rem 0 .75rem">Cap nota per avui.</p>';
+    html += '<button class="btn-primari" onclick="obrirFormDiari(\'' + avui + '\')">+ Afegir nota d\'avui</button>';
+  }
+  html += '</div>';
+
+  html += '<div id="form-diari" class="targeta" style="display:none">';
+  html += '<h3>Nota del dia</h3>';
+  html += '<div class="diari-estat-seleccio">';
+  for (const [key, val] of Object.entries(ESTAT_DIARI)) {
+    html += '<button class="btn-estat-diari" data-estat="' + key + '" onclick="seleccionarEstatDiari(\'' + key + '\')">' + val.text + '</button>';
+  }
+  html += '</div>';
+  html += '<div class="camp"><label>Notes del dia</label><textarea id="diari-text" rows="4" placeholder="Com ha anat el dia? Novetats, símptomes, estat anímic..."></textarea></div>';
+  html += '<details style="margin-bottom:.6rem"><summary style="font-size:.78rem;color:#777;cursor:pointer;padding:.3rem 0">Constants (opcional)</summary>';
+  html += '<div class="diari-constants-grup" style="margin-top:.4rem">';
+  html += '<div class="camp"><label>Tensió arterial</label><input type="text" id="diari-tensio" placeholder="ex: 120/80"></div>';
+  html += '<div class="camp"><label>Saturació O₂ (%)</label><input type="number" id="diari-saturacio" min="0" max="100" placeholder="95"></div>';
+  html += '<div class="camp"><label>Pes (kg)</label><input type="number" id="diari-pes" step="0.1" min="0" placeholder="65.5"></div>';
+  html += '</div></details>';
+  html += '<div class="form-accions"><button class="btn-primari" onclick="guardarEntradaDiari()">Guardar</button><button class="btn-secundari" onclick="tancarFormDiari()">Cancel·lar</button></div>';
+  html += '<div id="diari-missatge" class="form-missatge"></div>';
+  html += '</div>';
+
+  const anteriors = diari.filter(e => e.data !== avui).slice(0, 14);
+  if (anteriors.length) {
+    html += '<div class="targeta"><h3>Últimes entrades</h3><ul class="llista-entrades-diari">';
+    html += anteriors.map(e => {
+      const ec = ESTAT_DIARI[e.estat] || ESTAT_DIARI.ok;
+      const c = e.constants || {};
+      return '<li class="entrada-diari-item">' +
+        '<div class="entrada-diari-cap"><span class="entrada-diari-data">' + esc(formatarDataDiari(e.data)) + '</span>' +
+        '<span class="estat-pill estat-pill-sm ' + ec.cls + '">' + ec.text + '</span></div>' +
+        (e.text ? '<p class="entrada-diari-resum">' + esc(e.text.length > 120 ? e.text.slice(0, 120) + '…' : e.text) + '</p>' : '') +
+        (c.tensio || c.saturacio || c.pes ?
+          '<div class="entrada-constants">' +
+          (c.tensio ? '<span class="constant-item">TA: ' + esc(c.tensio) + '</span>' : '') +
+          (c.saturacio ? '<span class="constant-item">SpO₂: ' + esc(c.saturacio) + '%</span>' : '') +
+          (c.pes ? '<span class="constant-item">Pes: ' + esc(c.pes) + ' kg</span>' : '') +
+          '</div>' : '') +
+        '</li>';
+    }).join('');
+    html += '</ul></div>';
+  }
+
+  document.getElementById('contenidor-diari').innerHTML = html;
+}
+
+function obrirFormDiari(data) {
+  dataDiariEditant = data;
+  const entrada = (dadesApp.diari || []).find(e => e.data === data) || { estat: 'ok', text: '', constants: {} };
+  estatDiariActual = entrada.estat || 'ok';
+
+  const textEl = document.getElementById('diari-text');
+  const tensioEl = document.getElementById('diari-tensio');
+  const satEl = document.getElementById('diari-saturacio');
+  const pesEl = document.getElementById('diari-pes');
+  if (textEl) textEl.value = entrada.text || '';
+  const c = entrada.constants || {};
+  if (tensioEl) tensioEl.value = c.tensio || '';
+  if (satEl) satEl.value = c.saturacio || '';
+  if (pesEl) pesEl.value = c.pes || '';
+
+  actualitzarBotonsEstatDiari();
+  const formEl = document.getElementById('form-diari');
+  if (formEl) { formEl.style.display = ''; formEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  const missEl = document.getElementById('diari-missatge');
+  if (missEl) missEl.textContent = '';
+}
+
+function seleccionarEstatDiari(estat) {
+  estatDiariActual = estat;
+  actualitzarBotonsEstatDiari();
+}
+
+function actualitzarBotonsEstatDiari() {
+  document.querySelectorAll('.btn-estat-diari').forEach(btn => {
+    const actiu = btn.dataset.estat === estatDiariActual;
+    btn.className = 'btn-estat-diari' + (actiu ? ' actiu ' + (ESTAT_DIARI[btn.dataset.estat] || {}).cls : '');
+  });
+}
+
+function tancarFormDiari() {
+  const formEl = document.getElementById('form-diari');
+  if (formEl) formEl.style.display = 'none';
+  dataDiariEditant = null;
+}
+
+async function guardarEntradaDiari() {
+  const missatge = document.getElementById('diari-missatge');
+  if (!passwordSessio) {
+    const pw = prompt('Introdueix la contrasenya per guardar:');
+    if (!pw) return;
+    passwordSessio = pw;
+  }
+
+  const entrada = {
+    data: dataDiariEditant,
+    estat: estatDiariActual,
+    text: (document.getElementById('diari-text') || {}).value || '',
+    constants: {
+      tensio: (document.getElementById('diari-tensio') || {}).value || '',
+      saturacio: (document.getElementById('diari-saturacio') || {}).value || '',
+      pes: (document.getElementById('diari-pes') || {}).value || '',
+    },
+  };
+
+  const dades = JSON.parse(JSON.stringify(dadesApp));
+  dades.diari = dades.diari || [];
+  const idx = dades.diari.findIndex(e => e.data === dataDiariEditant);
+  if (idx >= 0) dades.diari[idx] = entrada;
+  else dades.diari.push(entrada);
+  dades.diari = dades.diari.sort((a, b) => b.data.localeCompare(a.data)).slice(0, 90);
+
+  missatge.textContent = 'Guardant...';
+  missatge.className = 'form-missatge';
+  const res = await Emmagatzematge.guardarRemot(dades, passwordSessio);
+  if (res.ok) {
+    dadesApp = dades;
+    missatge.textContent = '✓ Guardat correctament.';
+    missatge.className = 'form-missatge ok';
+    setTimeout(() => { tancarFormDiari(); renderitzarDiari(); }, 800);
+  } else {
+    missatge.textContent = '✗ Error: ' + (res.error || 'Error desconegut');
+    missatge.className = 'form-missatge error';
+    if (res.error && res.error.includes('ontrasenya')) passwordSessio = null;
+  }
+}
+
+// ── Recordatoris de medicació ────────────────────────────────────────────────
+
+const HORARIS_NOTIFICACIO = {
+  esmorzar: { h: 8, m: 0, label: 'Pastilles del matí' },
+  dinar: { h: 13, m: 30, label: 'Pastilles del migdia' },
+  sopar: { h: 21, m: 0, label: 'Pastilles del vespre' },
+};
+
+function iniciarRecordatoris() {
+  renderitzarWidgetRecordatoris();
+  if ('Notification' in window && Notification.permission === 'granted') programarRecordatoris();
+}
+
+function renderitzarWidgetRecordatoris() {
+  const el = document.getElementById('inici-recordatoris');
+  if (!el || !('Notification' in window)) { if (el) el.innerHTML = ''; return; }
+
+  const perm = Notification.permission;
+  if (perm === 'denied') {
+    el.innerHTML = '<div class="targeta widget-recordatoris"><p style="font-size:.78rem;color:#999">Recordatoris bloquejats. Activa\'ls des de la configuració del teu navegador.</p></div>';
+    return;
+  }
+  if (perm === 'default') {
+    el.innerHTML = '<div class="targeta widget-recordatoris"><h3>Recordatoris de medicació</h3>' +
+      '<p style="font-size:.8rem;color:#666;margin:.35rem 0 .75rem">Rep un avís al mòbil quan toca prendre les pastilles (matí, migdia i vespre).</p>' +
+      '<button class="btn-primari" onclick="activarRecordatoris()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icn-sm"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Activar recordatoris</button></div>';
+    return;
+  }
+  el.innerHTML = '<div class="estat-recordatoris-actiu">' +
+    '<p style="font-size:.78rem;color:#1a6630"><strong>Recordatoris actius</strong> &mdash; Matí 8:00 · Migdia 13:30 · Vespre 21:00</p></div>';
+}
+
+async function activarRecordatoris() {
+  const perm = await Notification.requestPermission();
+  renderitzarWidgetRecordatoris();
+  if (perm === 'granted') programarRecordatoris();
+}
+
+function programarRecordatoris() {
+  if (Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.ready.then(reg => {
+    const ara = new Date();
+    for (const [moment, config] of Object.entries(HORARIS_NOTIFICACIO)) {
+      const meds = (dadesApp.medicacio || [])
+        .filter(m => m.moment === moment && m.nom)
+        .map(m => m.nom)
+        .join(', ');
+      if (!meds) continue;
+      const propera = new Date();
+      propera.setHours(config.h, config.m, 0, 0);
+      if (propera <= ara) continue;
+      const ms = propera - ara;
+      setTimeout(() => {
+        reg.showNotification(config.label, {
+          body: meds,
+          icon: '/icones/icon-192.png',
+          tag: 'medicacio-' + moment,
+          renotify: true,
+        });
+      }, ms);
+    }
+  });
 }
 
 async function guardarEditor() {

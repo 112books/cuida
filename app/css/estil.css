@@ -4,7 +4,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f5;color:#1a
 body>header{padding:1rem 1rem .5rem;position:sticky;top:0;z-index:100;background:#fdf6ef;border-bottom:1px solid #ddddd8}
 #pantalla-login h1{font-weight:300;font-size:2rem}
 #navegacio-inferior{position:fixed;bottom:0;left:0;right:0;background:#f5f5f5;display:flex;justify-content:space-around;z-index:200;padding:.35rem 0;border-top:1px solid #e0e0e0}
-.tab-nav{display:flex;flex-direction:column;align-items:center;background:0;border:none;cursor:pointer;font-size:.6rem;color:#999;padding:.2rem .4rem;gap:.1rem;transition:color .15s;letter-spacing:.02em}
+.tab-nav{display:flex;flex-direction:column;align-items:center;background:0;border:none;cursor:pointer;font-size:.55rem;color:#999;padding:.2rem .2rem;gap:.1rem;transition:color .15s;letter-spacing:.02em}
 .tab-nav.actiu{color:#222}
 .tab-nav .icn{width:1.3rem;height:1.3rem;display:block}
 .tab-nav.actiu .icn{stroke-width:2.5}
@@ -125,4 +125,22 @@ body>header{padding:1rem 1rem .5rem;position:sticky;top:0;z-index:100;background
 .tasca-item+.tasca-item{border-top:1px solid #f0f0f0}
 .btn-imprimir{display:inline-flex;align-items:center;gap:.3rem;padding:.45rem .85rem;background:#e0e0e0;border:none;border-radius:8px;font-size:.75rem;font-weight:500;color:#1a1a1a;cursor:pointer;margin-bottom:.75rem}
 .btn-imprimir .icn-sm{width:.85rem;height:.85rem}
+.llista-entrades-diari{list-style:none}
+.entrada-diari-item{padding:.65rem 0}
+.entrada-diari-item+.entrada-diari-item{border-top:1px solid #e5e5e5}
+.entrada-diari-cap{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;flex-wrap:wrap}
+.entrada-diari-data{font-size:.78rem;font-weight:600;color:#1a1a1a}
+.estat-pill-sm{padding:.15rem .5rem;font-size:.68rem}
+.entrada-diari-text{font-size:.82rem;line-height:1.5;margin:.2rem 0 0}
+.entrada-diari-resum{font-size:.78rem;color:#555;line-height:1.4;margin-top:.2rem}
+.entrada-constants{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.35rem}
+.constant-item{font-size:.7rem;background:#f0f0f0;border-radius:4px;padding:.15rem .4rem;color:#555}
+.diari-estat-seleccio{display:flex;gap:.4rem;margin:.4rem 0 .6rem}
+.btn-estat-diari{flex:1;padding:.5rem .3rem;border:1px solid #e0e0e0;border-radius:8px;background:#fff;cursor:pointer;font-size:.78rem;font-weight:500;text-align:center;transition:all .15s}
+.btn-estat-diari.actiu.estat-ok{background:#d4edda;border-color:#1a6630;color:#1a6630;font-weight:700}
+.btn-estat-diari.actiu.estat-revisar{background:#fff3cd;border-color:#7d5a00;color:#7d5a00;font-weight:700}
+.btn-estat-diari.actiu.estat-critic{background:#f8d7da;border-color:#7a1c24;color:#7a1c24;font-weight:700}
+.widget-recordatoris{padding:.65rem 1rem}
+.estat-recordatoris-actiu{background:#f0faf4;border-left:3px solid #1a6630;padding:.5rem 1rem}
+.diari-constants-grup{margin-top:.5rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem}
 @media print{#pantalla-login,body>header,#navegacio-inferior,.peu-vista,.btn-imprimir,.btn-trucar,.btn-facetime,.btn-trucar-emergencia,.btn-emergencia,.btn-responsable,.btn-trucar-pas,.btn-secundari{display:none!important}body{padding:0;background:#fff;font-size:14pt;color:#000}#contingut{padding:0;max-width:none}.vista{display:none!important}.vista.activa{display:block!important}.targeta,.grup-medicacio,.seccio-config{background:#fff;border-radius:0;box-shadow:none;border-bottom:1px solid #ccc;margin-bottom:.5rem;padding:.5rem 0}.targeta h3{font-size:12pt;font-weight:700}.contacte-info strong{font-size:12pt}.contacte-info p,.contacte-info small{font-size:11pt;color:#000}.item-medicacio h3{font-size:12pt;font-weight:700}.item-medicacio p,.item-medicacio small{font-size:11pt;color:#000}.grup-medicacio-titol{font-size:11pt;font-weight:700;color:#000;border-bottom:1px solid #000}.item-medicacio-resum{font-size:11pt}.med-nom-resum{font-size:11pt;font-weight:700}.med-dosi-resum{font-size:10pt;color:#333}.alerta-medicacio{font-size:10pt;color:#000;font-weight:700}.estat-pill{border:1px solid #000;background:#fff;color:#000}.vista h2{font-size:13pt;color:#000;border-bottom:1px solid #000;margin-bottom:.75rem}}
