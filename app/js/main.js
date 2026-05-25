@@ -102,6 +102,16 @@ function renderitzarInici() {
   document.getElementById('estat-general').innerHTML = '<span class="estat-pill ' + pillClass + '">' + pillText + '</span>';
   document.getElementById('llista-avisos').innerHTML = tots.map(a => '<li class="aviso-item">' + a + '</li>').join('');
   document.getElementById('llista-avisos').style.display = tots.length ? '' : 'none';
+
+  const ox = dadesApp.oxigen || {};
+  const fluxText = ox.flux !== undefined && ox.flux !== '' ? String(ox.flux) + ' l/min' : 'No especificat';
+  document.getElementById('inici-oxigen').innerHTML =
+    '<div class="targeta targeta-oxigen">' +
+    '<h3>Oxigen continu</h3>' +
+    '<p class="oxigen-flux"><strong>Flux:</strong> ' + esc(fluxText) + '</p>' +
+    '<div class="oxigen-aviso">Reomplir el contenidor de l\'humidificador amb <strong>AIGUA FILTRADA</strong></div>' +
+    (ox.notes ? '<p style="margin-top:.4rem"><small>' + esc(ox.notes) + '</small></p>' : '') +
+    '</div>';
 }
 
 function renderitzarContactes() {
@@ -192,9 +202,27 @@ function renderitzarUrgencies() {
 
 function renderitzarMedicacio() {
   if (!dadesApp) return;
-  document.getElementById('contenidor-medicacio').innerHTML = dadesApp.medicacio.map(m =>
-    '<div class="item-medicacio"><h3>' + esc(m.nom) + ' <small>' + esc(m.via) + '</small></h3><p><strong>Dosi:</strong> ' + esc(m.dosi) + '</p><p><strong>Horari:</strong> ' + esc(m.horari) + '</p><p><strong>Per a qu&egrave;:</strong> ' + esc(m.per_a_que) + '</p>' + (m.notes.includes('NOMÉS') ? '<p class="alerta-medicacio">' + esc(m.notes) + '</p>' : '<small>' + esc(m.notes) + '</small>') + '</div>'
-  ).join('');
+  const grups = { esmorzar: [], dinar: [], sopar: [], altres: [] };
+  const etiquetes = { esmorzar: 'Esmorzar', dinar: 'Dinar', sopar: 'Sopar', altres: 'Altres / Si cal' };
+  dadesApp.medicacio.forEach(m => {
+    const k = grups[m.moment] ? m.moment : 'altres';
+    grups[k].push(m);
+  });
+  let html = '';
+  for (const key of ['esmorzar', 'dinar', 'sopar', 'altres']) {
+    if (!grups[key].length) continue;
+    html += '<h3 class="grup-medicacio-titol">' + etiquetes[key] + '</h3><div class="grup-medicacio">';
+    html += grups[key].map(m =>
+      '<div class="item-medicacio"><h3>' + esc(m.nom) + ' <small>' + esc(m.via) + '</small></h3>' +
+      '<p><strong>Dosi:</strong> ' + esc(m.dosi) + '</p>' +
+      '<p><strong>Horari:</strong> ' + esc(m.horari) + '</p>' +
+      '<p><strong>Per a qu&egrave;:</strong> ' + esc(m.per_a_que) + '</p>' +
+      (m.notes && m.notes.includes('NOMÉS') ? '<p class="alerta-medicacio">' + esc(m.notes) + '</p>' : '<small>' + esc(m.notes || '') + '</small>') +
+      '</div>'
+    ).join('');
+    html += '</div>';
+  }
+  document.getElementById('contenidor-medicacio').innerHTML = html;
 }
 
 function renderitzarGraella() {
@@ -354,6 +382,12 @@ function renderitzarFormulariEdicio() {
   h += '</div>';
   h += '<button class="btn-secundari btn-afegir" onclick="afegirMedicament()">' + ICONS.plus + ' Afegir medicament</button>';
 
+  // Oxigen
+  const ox = d.oxigen || {};
+  h += '<h3 class="form-seccio-titol">Oxigen</h3>';
+  h += camp('Flux (l/min)', 'f-oxigen-flux', String(ox.flux || ''));
+  h += camp('Notes', 'f-oxigen-notes', ox.notes || '');
+
   // Botons acció
   h += '<div class="form-accions"><button class="btn-primari" onclick="guardarEditor()">Guardar a Cloudflare</button><button class="btn-secundari" onclick="tancarEditor()">Cancel·lar</button></div>';
   h += '<div id="form-missatge" class="form-missatge"></div>';
@@ -404,7 +438,14 @@ function itemMedicacioHTML(m, i) {
     '<button class="btn-eliminar-item" onclick="eliminarItem(\'f-medicacio\',\'med-' + i + '\')" title="Eliminar">' + ICONS.trash + '</button>' +
     '<div class="camp"><label>Nom del medicament</label><input type="text" class="med-nom" value="' + esc(m.nom || '') + '"></div>' +
     '<div class="camp"><label>Dosi</label><input type="text" class="med-dosi" value="' + esc(m.dosi || '') + '"></div>' +
-    '<div class="camp"><label>Horari</label><input type="text" class="med-horari" value="' + esc(m.horari || '') + '"></div>' +
+    '<div class="camp"><label>Moment del dia</label><select class="med-moment">' +
+    '<option value=""' + (!m.moment ? ' selected' : '') + '>Selecciona...</option>' +
+    '<option value="esmorzar"' + (m.moment === 'esmorzar' ? ' selected' : '') + '>Esmorzar</option>' +
+    '<option value="dinar"' + (m.moment === 'dinar' ? ' selected' : '') + '>Dinar</option>' +
+    '<option value="sopar"' + (m.moment === 'sopar' ? ' selected' : '') + '>Sopar</option>' +
+    '<option value="altres"' + (m.moment === 'altres' ? ' selected' : '') + '>Altres / Si cal</option>' +
+    '</select></div>' +
+    '<div class="camp"><label>Horari / Pauta</label><input type="text" class="med-horari" value="' + esc(m.horari || '') + '"></div>' +
     '<div class="camp"><label>Via</label><input type="text" class="med-via" value="' + esc(m.via || '') + '"></div>' +
     '<div class="camp"><label>Per a qu&egrave;</label><input type="text" class="med-peraque" value="' + esc(m.per_a_que || '') + '"></div>' +
     '<div class="camp"><label>Notes</label><input type="text" class="med-notes" value="' + esc(m.notes || '') + '"></div>' +
@@ -443,7 +484,7 @@ function afegirFamilia() {
 function afegirMedicament() {
   const cnt = document.getElementById('f-medicacio');
   const i = cnt.children.length;
-  cnt.insertAdjacentHTML('beforeend', itemMedicacioHTML({ nom: '', dosi: '', horari: '', via: '', per_a_que: '', notes: '' }, i));
+  cnt.insertAdjacentHTML('beforeend', itemMedicacioHTML({ nom: '', dosi: '', horari: '', via: '', per_a_que: '', notes: '', moment: '' }, i));
 }
 
 function recollirDadesFormulari() {
@@ -496,7 +537,13 @@ function recollirDadesFormulari() {
     via: (el.querySelector('.med-via') || {}).value || '',
     per_a_que: (el.querySelector('.med-peraque') || {}).value || '',
     notes: (el.querySelector('.med-notes') || {}).value || '',
+    moment: (el.querySelector('.med-moment') || {}).value || '',
   }));
+
+  dades.oxigen = {
+    flux: get('f-oxigen-flux'),
+    notes: get('f-oxigen-notes'),
+  };
 
   return dades;
 }
