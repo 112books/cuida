@@ -109,6 +109,8 @@ function renderitzarInici() {
   const ox = dadesApp.oxigen || {};
   const fluxText = ox.flux !== undefined && ox.flux !== '' ? String(ox.flux) + ' l/min' : 'No especificat';
   const tasques = dadesApp.tasques_cuidadora || [];
+  renderitzarInvitacioDiari();
+
   document.getElementById('inici-tasques').innerHTML = tasques.filter(t => t).length
     ? '<div class="targeta"><h3>Recordatori diari cuidadora</h3><ul class="llista-tasques">' +
       tasques.filter(t => t).map(t => '<li class="tasca-item">' + esc(t) + '</li>').join('') +
@@ -766,68 +768,128 @@ async function guardarEntradaDiari() {
   }
 }
 
-// ── Recordatoris de medicació ────────────────────────────────────────────────
+// ── Recordatoris Web Push ────────────────────────────────────────────────────
 
-const HORARIS_NOTIFICACIO = {
-  esmorzar: { h: 8, m: 0, label: 'Pastilles del matí' },
-  dinar: { h: 13, m: 30, label: 'Pastilles del migdia' },
-  sopar: { h: 21, m: 0, label: 'Pastilles del vespre' },
-};
+const VAPID_PUBLIC_KEY = 'BLOROpMbSeti3rwbsSTNGZUBOzyrUM22ddU7tsRLkbc0Mvbk4oT29JMWA4KGaVP-_NT44puhVsxm8bRwIbn9oDg';
 
-function iniciarRecordatoris() {
-  renderitzarWidgetRecordatoris();
-  if ('Notification' in window && Notification.permission === 'granted') programarRecordatoris();
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
 }
 
-function renderitzarWidgetRecordatoris() {
+let subscripcioActual = null;
+
+async function iniciarRecordatoris() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    renderitzarWidgetRecordatoris(null, false);
+    return;
+  }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    subscripcioActual = await reg.pushManager.getSubscription();
+  } catch (e) { subscripcioActual = null; }
+  renderitzarWidgetRecordatoris(subscripcioActual, true);
+  renderitzarInvitacioDiari();
+}
+
+function renderitzarWidgetRecordatoris(sub, suportat) {
   const el = document.getElementById('inici-recordatoris');
-  if (!el || !('Notification' in window)) { if (el) el.innerHTML = ''; return; }
+  if (!el) return;
+
+  if (!suportat) { el.innerHTML = ''; return; }
 
   const perm = Notification.permission;
+
+  if (sub) {
+    el.innerHTML = '<div class="estat-recordatoris-actiu">' +
+      '<p style="font-size:.78rem;color:#1a6630"><strong>Recordatoris actius</strong> — Matí 8h · Migdia 13:30h · Vespre 21h</p>' +
+      '<button class="btn-link-petit" onclick="cancellarRecordatoris()">Cancel·lar recordatoris</button></div>';
+    return;
+  }
+
   if (perm === 'denied') {
-    el.innerHTML = '<div class="targeta widget-recordatoris"><p style="font-size:.78rem;color:#999">Recordatoris bloquejats. Activa\'ls des de la configuració del teu navegador.</p></div>';
+    el.innerHTML = '<div class="targeta widget-recordatoris"><p style="font-size:.78rem;color:#999">Notificacions bloquejades. Activa-les a la configuració del navegador.</p></div>';
     return;
   }
-  if (perm === 'default') {
-    el.innerHTML = '<div class="targeta widget-recordatoris"><h3>Recordatoris de medicació</h3>' +
-      '<p style="font-size:.8rem;color:#666;margin:.35rem 0 .75rem">Rep un avís al mòbil quan toca prendre les pastilles (matí, migdia i vespre).</p>' +
-      '<button class="btn-primari" onclick="activarRecordatoris()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icn-sm"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> Activar recordatoris</button></div>';
-    return;
-  }
-  el.innerHTML = '<div class="estat-recordatoris-actiu">' +
-    '<p style="font-size:.78rem;color:#1a6630"><strong>Recordatoris actius</strong> &mdash; Matí 8:00 · Migdia 13:30 · Vespre 21:00</p></div>';
+
+  el.innerHTML = '<div class="targeta widget-recordatoris">' +
+    '<h3>Recordatoris de medicació</h3>' +
+    '<p style="font-size:.8rem;color:#666;margin:.35rem 0 .65rem">Rep un avís quan toca prendre les pastilles, fins i tot amb la app tancada.</p>' +
+    '<div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">' +
+    '<input type="text" id="input-nom-push" placeholder="El teu nom" style="padding:.4rem .65rem;border:1px solid #e0e0e0;border-radius:6px;font-size:.82rem;flex:1;min-width:120px">' +
+    '<button class="btn-primari" onclick="activarRecordatoris()">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icn-sm"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>' +
+    ' Activar</button></div>' +
+    '<div id="push-missatge" style="font-size:.75rem;margin-top:.4rem;min-height:.9rem"></div>' +
+    '</div>';
 }
 
 async function activarRecordatoris() {
+  const nom = (document.getElementById('input-nom-push') || {}).value || '';
+  if (!nom.trim()) {
+    const m = document.getElementById('push-missatge');
+    if (m) { m.textContent = 'Introdueix el teu nom primer.'; m.style.color = '#d9534f'; }
+    return;
+  }
+
   const perm = await Notification.requestPermission();
-  renderitzarWidgetRecordatoris();
-  if (perm === 'granted') programarRecordatoris();
+  if (perm !== 'granted') {
+    renderitzarWidgetRecordatoris(null, true);
+    return;
+  }
+
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+    });
+    subscripcioActual = sub;
+
+    await fetch('/api/suscripcions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom: nom.trim(), subscription: sub.toJSON() }),
+    });
+
+    renderitzarWidgetRecordatoris(sub, true);
+  } catch (e) {
+    console.error('Error activant push:', e);
+    const m = document.getElementById('push-missatge');
+    if (m) { m.textContent = 'Error activant. Prova de recarregar la pàgina.'; m.style.color = '#d9534f'; }
+  }
 }
 
-function programarRecordatoris() {
-  if (Notification.permission !== 'granted' || !('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.ready.then(reg => {
-    const ara = new Date();
-    for (const [moment, config] of Object.entries(HORARIS_NOTIFICACIO)) {
-      const meds = (dadesApp.medicacio || [])
-        .filter(m => m.moment === moment && m.nom)
-        .map(m => m.nom)
-        .join(', ');
-      if (!meds) continue;
-      const propera = new Date();
-      propera.setHours(config.h, config.m, 0, 0);
-      if (propera <= ara) continue;
-      const ms = propera - ara;
-      setTimeout(() => {
-        reg.showNotification(config.label, {
-          body: meds,
-          icon: '/icones/icon-192.png',
-          tag: 'medicacio-' + moment,
-          renotify: true,
-        });
-      }, ms);
+async function cancellarRecordatoris() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      await fetch('/api/suscripcions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: sub.endpoint }),
+      });
+      await sub.unsubscribe();
     }
-  });
+    subscripcioActual = null;
+    renderitzarWidgetRecordatoris(null, true);
+  } catch (e) { console.error('Error cancel·lant push:', e); }
+}
+
+function renderitzarInvitacioDiari() {
+  const el = document.getElementById('inici-diari-avui');
+  if (!el || !dadesApp) return;
+  const avui = new Date().toISOString().split('T')[0];
+  const teDiari = (dadesApp.diari || []).some(e => e.data === avui);
+  if (teDiari) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="targeta invitacio-diari">' +
+    '<p style="font-size:.82rem;color:#555;margin-bottom:.5rem">Ningú ha escrit la nota del diari d\'avui.</p>' +
+    '<button class="btn-secundari" onclick="canviarVista(\'diari\')">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icn-sm"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>' +
+    ' Afegir nota d\'avui</button></div>';
 }
 
 async function guardarEditor() {

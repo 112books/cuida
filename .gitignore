@@ -11,5 +11,6 @@ Thumbs.db
 *.log
 config.local.js
 app/dades.json
+data/subs.json
 .env
 .env.*
