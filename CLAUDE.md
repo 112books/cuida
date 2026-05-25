@@ -1,17 +1,17 @@
 # CLAUDE.md — Guia del projecte Cuida
 
-## ESTAT ACTUAL (10 maig 2026) — Beta 1 tancada ✓
+## ESTAT ACTUAL (25 maig 2026) — Beta 1 + millores medicació/oxigen
 
 App PWA per coordinar cura del Joan (cardiorespiratori, oxigen, morfina, PADES).
-**Beta 1 tancada i etiquetada `v1.0-beta` als dos repos. Cloudflare KV pendent de setup.**
+Backend: **GitHub API** (llegeix/escriu `app/dades.json` al repo privat via Cloudflare Pages Function).
 
 ### Repositoris i desplegament
 
-- **Públic**: `112books/cuida` (plantilla buida, indexable, `v1.0-beta`)
-- **Privat**: `112books/cuida-avi-joan` (dades reals del Joan, `v1.0-beta`)
+- **Públic**: `112books/cuida` (plantilla buida, indexable)
+- **Privat**: `112books/cuida-avi-joan` (dades reals del Joan, en producció)
 - **Live**: https://cuida-avi-joan.pages.dev/ (Cloudflare Pages)
 - Build output: `app/`, sense build command
-- Password client-side (login): "peidro" — també és `CUIDA_PASSWORD` al KV
+- Password client-side (login): "peidro" — també és `CUIDA_PASSWORD` a Cloudflare Pages Settings
 - Desplegament automàtic via `git push private main`
 - Remots: `origin` = públic, `private` = privat (Cloudflare)
 
@@ -19,84 +19,89 @@ App PWA per coordinar cura del Joan (cardiorespiratori, oxigen, morfina, PADES).
 
 - **`main` local** = privat amb dades reals del Joan
 - **`origin/main`** = plantilla buida per a ús públic (sense dades, sense foto, sense docs interns)
-- Per desplegar al públic: crear branca `public-beta1`, fer neteja, force push a `origin/main`
+- Per desplegar al públic: crear branca `public`, fer neteja, force push a `origin/main`
 - **NO fer `git push origin main` directament** — sobreescriuria amb dades privades
 
-### Flux de dades (amb KV actiu)
+### Flux de dades (GitHub API)
 
-1. `carregarDades()` → async, fa `fetch('/api/dades')` (Cloudflare KV via Pages Function)
-2. Si KV buit o error de xarxa → fallback a `DADES_INICIALS` de `dades.js`
-3. Edició via formulari a Config → POST a `/api/dades` amb password → escriu KV
-4. Tots els dispositius veuen els canvis en la propera recàrrega
-5. Export JSON disponible a Config com a backup manual
+1. `carregarDades()` → async, fa `fetch('/api/dades')` (Cloudflare Pages Function)
+2. La Function llegeix `app/dades.json` del repo privat via GitHub API
+3. Si error de xarxa → fallback a `DADES_INICIALS` de `dades.js`
+4. Edició via formulari a Config → POST a `/api/dades` amb password → Function escriu `app/dades.json` via GitHub API
+5. Tots els dispositius veuen els canvis en la propera recàrrega (service worker v6 auto-reload)
+6. Export JSON disponible a Config com a backup manual
 
-### Backend: Cloudflare Pages Function
+**IMPORTANT**: Quan l'API fa POST escriu un commit a GitHub. Sempre cal `git pull private main --rebase` abans de `git push private main` per evitar conflictes.
 
-- Fitxer: `app/functions/api/dades.js` (GET llegeix KV, POST valida password i escriu KV)
-- KV namespace: `CUIDA_DADES` (clau única "dades" → JSON complet)
-- Variable d'entorn: `CUIDA_PASSWORD` (Secret a Cloudflare Pages Settings)
-- **IMPORTANT:** com que el publish dir és `app/`, les functions van a `app/functions/`, NO a l'arrel del repo
+### Backend: Cloudflare Pages Function (GitHub API)
 
-### Setup Cloudflare KV (PENDENT — 5-10 min)
-
-1. Dashboard → Workers & Pages → KV → Create namespace → Nom: `CUIDA_DADES`
-2. Pages → cuida-avi-joan → Settings → Environment variables → Secret: `CUIDA_PASSWORD` = "peidro"
-3. Pages → Settings → Functions → KV namespace bindings → Variable: `CUIDA_DADES`
-4. `git push private main` → redesplegament automàtic
-5. Verificació: obrir `/api/dades` al navegador — hauries de veure JSON
+- Fitxer: `functions/api/dades.js` a l'ARREL del repo (Cloudflare el publica com a Pages Function)
+- GET → llegeix `app/dades.json` del repo `112books/cuida-avi-joan` via GitHub API
+- POST → valida `CUIDA_PASSWORD`, obté SHA actual, escriu nou JSON via GitHub PUT
+- Variables d'entorn necessàries a Cloudflare Pages Settings:
+  - `GITHUB_TOKEN` — token GitHub amb permisos `repo` (read/write)
+  - `CUIDA_PASSWORD` — contrasenya d'escriptura (= "peidro")
 
 ### Model de dades (`app/js/dades.js`)
 
-`DADES_INICIALS` conté: pacient (nom, situacio, telefon, foto, nota),
-contactes_medics (rol, nom, telefon, notes, prioritat),
-proveidors (nom, telefon, notes),
-rols_familiars (rol, principal, suplent, telefon, notes),
-medicacio (17 fàrmacs: nom, dosi, horari, via, per_a_que, notes),
-empresa_cuidadora (nom, telefon, responsable),
-cuidadors (nom, telefon, horari) — array,
-voluntats_anticipades, protocols_urgencies, pla_avia,
-indicadors_desgast, graella (fase, escenari, cuidadora, ical).
+`DADES_INICIALS` conté:
+- `pacient` (nom, situacio, telefon, foto, nota)
+- `contactes_medics` (rol, nom, telefon, notes, prioritat)
+- `proveidors` (nom, telefon, notes)
+- `rols_familiars` (rol, principal, suplent, telefon, notes)
+- `medicacio` — array, cada ítem: `{nom, dosi, horari, via, per_a_que, notes, moment}`
+  - `moment` values: `'esmorzar'` / `'dinar'` / `'sopar'` / `'altres'` / `'continu'`
+  - Grups visualitzats: Matí / Migdia / Nit / Puntual / Altres
+- `empresa_cuidadora` (nom, telefon, responsable)
+- `cuidadors` (nom, telefon, horari) — array
+- `oxigen` (flux, notes) — flux en L/min, notes sobre humidificador
+- `tasques_cuidadora` — array de strings (tasques diàries per la cuidadora)
+- `voluntats_anticipades`, `protocols_urgencies`, `pla_avia`
+- `indicadors_desgast`, `graella` (fase, escenari, cuidadora, ical)
 
 `PLANTILLA_BUIDA` = versió buida per al repositori públic.
 Al repo públic: `const DADES_INICIALS = PLANTILLA_BUIDA;`
 
 ### Fitxers clau
 
-- `app/functions/api/dades.js` — Pages Function backend KV (GET/POST)
-- `app/js/dades.js` — dades inicials i fallback offline
-- `app/js/main.js` — lògica: renderitzarX(), formulari edició, carregarDades() async
+- `functions/api/dades.js` — Pages Function backend (GET/POST, GitHub API)
+- `app/dades.json` — dades persistides (creat/actualitzat per l'API, NOMÉS al repo privat)
+- `app/js/dades.js` — `DADES_INICIALS` i `PLANTILLA_BUIDA` (fallback offline)
+- `app/js/main.js` — lògica: `renderitzarX()`, formulari edició, `carregarDades()` async
 - `app/js/calendari.js` — graella cuidadors
-- `app/js/emmagatzematge.js` — export/import JSON
+- `app/js/emmagatzematge.js` — export/import JSON + `Emmagatzematge.carregarRemot()`
 - `app/index.html` — 6 vistes (Inici, Graella, Contactes, Urgències, Medicació, Config)
 - `app/css/estil.css` — disseny zen grisos
-- `app/service-worker.js` — cache v3, exclou /api/
-- `app/imatges/avi-joan.png` — foto del pacient (NOMÉS al repo privat)
+- `app/service-worker.js` — cache v6, exclou /api/, auto-reload via postMessage SW_UPDATE
+- `app/_headers` — Cloudflare headers: no-cache per SW i index.html, no-store per /api/
+- `app/imatges/avi-joan.png` — foto del pacient (TOTS DOS repos, homenatge)
+- `app/icones/icon-192.png`, `icon-512.png` — icones PWA (foto avi Joan, tots dos repos)
 
 ### Disseny
 
 - Grisos: fons #f5f5f5, targetes #fff, text #1a1a1a, accents #222
 - Vermell #d9534f només a urgències i alertes
 - Pastilles d'estat: verd `.estat-ok`, taronja `.estat-revisar`, vermell `.estat-critic`
-- Header "LinuxBCN — **Cuida**" centrat, tipografia IBM Plex Mono
+- Header "Cuida per LinuxBCN" centrat, tipografia IBM Plex Mono
 - Navegació inferior fixa amb icones SVG inline
 - Mobile-first, sense dependències externes
 
-### Funcionalitats (Beta 1)
+### Funcionalitats (25 maig 2026)
 
-- Inici: foto pacient, pastilla estat (verd/taronja/vermell), accions ràpides
+- Inici: foto pacient, pastilla estat (verd/taronja/vermell), widget oxigen (flux + avís humidificador), tasques diàries cuidadora, accions ràpides
 - Graella: horari setmanal cuidadors amb colors
 - Contactes: empresa, cuidadors, metges, proveïdors, família — botons tel/FaceTime
-- Urgències: protocols pas a pas, botó vermell truca 112
-- Medicació: 17 fàrmacs amb dosi, horari, alertes
-- Config: editor de dades (formulari), guia, export/import JSON, guia Cloudflare
+- Urgències: protocols pas a pas (inclou oxigen buit i màquina avariada), botó vermell truca 112
+- Medicació: resum per grups d'àpat (Matí/Migdia/Nit/Puntual/Altres) a dalt, detall complet a sota
+- Config: editor de dades (formulari), guia, export/import JSON
 
 ### PENDENTS per a properes versions
 
-- **Setup Cloudflare KV** (5-10 min al dashboard, veure passos amunt)
 - Telèfon Teleassistència (editable via formulari a Config)
 - DVA (voluntats anticipades) — verificar si existeix document físic
 - Domini `cuida.linuxbcn.cat` a Cloudflare (cal afegir linuxbcn.cat al compte)
-- Icones PWA reals (ara placeholders)
+- Avisos setmanals via WhatsApp/email als cuidadors principals (pendent)
+- Impressió optimitzada de contactes i medicació (text gran)
 
 ### Com es treballa
 
@@ -105,12 +110,13 @@ cd /Users/joan/Documents/Obsidian/cuida.linuxbcn.cat
 # Local:
 cd app && python3 -m http.server 8080
 # Desplegar al privat (Cloudflare):
-git add -A && git commit -m "missatge" && git push private main
+git pull private main --rebase && git add -A && git commit -m "missatge" && git push private main
+# Si l'API ha fet un commit entre mig, sempre pull --rebase primer
 # Actualitzar repo públic (amb branca de neteja):
-git checkout -b public-beta1
-# ... fer neteja de dades ...
-git push origin public-beta1:main --force
-git checkout main && git branch -D public-beta1
+git checkout -b public-sync
+# ... fer neteja de dades (PLANTILLA_BUIDA, sense avi-joan.png a imatges/) ...
+git push origin public-sync:main --force
+git checkout main && git branch -D public-sync
 ```
 
 ## NOTES PER A LA IA
@@ -118,12 +124,16 @@ git checkout main && git branch -D public-beta1
 - Codi en català
 - Funcions: `renderitzarX()`
 - Sense dependències externes
-- Service worker: cache v3 — actualitzar `CACHE_NOM` i `FILES` si s'afegeixen fitxers nous
-- No usar localStorage — les dades van a Cloudflare KV via `/api/dades`
+- Service worker: **cache v6** — actualitzar `CACHE` i `FILES` si s'afegeixen fitxers nous
 - `esc()` definida a `main.js`, NO a `calendari.js`
 - `netejarTel()` treu espais i guions dels telèfons
-- Contrasenya "peidro": login client-side (`index.html`) + `CUIDA_PASSWORD` a Cloudflare (KV write)
+- Contrasenya "peidro": login client-side (`index.html`) + `CUIDA_PASSWORD` a Cloudflare (API write)
 - `carregarDades()` és async — qualsevol cosa que en depengui ha d'esperar `await`
 - `Calendari.generarGraellaHTML(dades)` — un sol argument, sense escenari
 - `seccioConfigurable(t, c, obert)` — tercer argument booleà per controlar si s'obre per defecte
 - Pastilla estat a `#estat-general`, llista detall a `#llista-avisos` (hidden quan tot ok)
+- Widget oxigen a `#inici-oxigen`, tasques cuidadora a `#inici-tasques` (a vista-inici)
+- Medicació agrupa per `moment`: esmorzar→Matí, dinar→Migdia, sopar→Nit, altres→Puntual, continu→Altres
+- `itemTascaHTML(t, i)` genera HTML per a cada tasca de la cuidadora
+- `afegirTasca()` afegeix una nova tasca al formulari d'edició
+- Backend: `new Function(content + '; return {DADES_INICIALS};')()` per eval segur de dades.js si cal
