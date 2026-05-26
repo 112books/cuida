@@ -1,6 +1,6 @@
 # CLAUDE.md — Guia del projecte Cuida
 
-## ESTAT ACTUAL (26 maig 2026) — Beta 2 ✓ tancada i sincronitzada
+## ESTAT ACTUAL (26 maig 2026) — Beta 2 ✓ + medicació multi-moment + crons operatius
 
 App PWA per coordinar cura del Joan (cardiorespiratori, oxigen, morfina, PADES).
 Backend: **GitHub API** (llegeix/escriu `app/dades.json` al repo privat via Cloudflare Pages Functions).
@@ -76,9 +76,11 @@ Totes a `functions/api/`:
 - `contactes_medics` (rol, nom, telefon, notes, prioritat)
 - `proveidors` (nom, telefon, notes)
 - `rols_familiars` (rol, principal, suplent, telefon, notes)
-- `medicacio` — array, cada ítem: `{nom, dosi, horari, via, per_a_que, notes, moment}`
-  - `moment` values: `'esmorzar'` / `'dinar'` / `'sopar'` / `'altres'` / `'continu'`
-  - Grups visualitzats: Matí / Migdia / Nit / Puntual / Altres
+- `medicacio` — array, cada ítem: `{nom, dosi, horari, via, per_a_que, notes, moments}`
+  - `moments` és un **array**: `['esmorzar']`, `['esmorzar','sopar']`, `['esmorzar','dinar','sopar']`, etc.
+  - Valors possibles per element: `'esmorzar'` / `'dinar'` / `'sopar'` / `'altres'` / `'continu'`
+  - Compatible enrere: `normMoments(m)` llegeix `m.moments` (array) o `m.moment` (string antic)
+  - Grups visualitzats: Matí / Migdia / Nit / Puntual / Altres — un medicament pot aparèixer a diversos grups
 - `empresa_cuidadora` (nom, telefon, responsable)
 - `cuidadors` (nom, telefon, horari) — array
 - `oxigen` (flux, notes) — flux en L/min, notes sobre humidificador
@@ -189,7 +191,8 @@ git checkout main && git branch -D public-sync
 - `Calendari.generarGraellaHTML(dades)` — un sol argument, sense escenari
 - `seccioConfigurable(t, c, obert)` — tercer argument booleà per controlar si s'obre per defecte
 - DOM inici: `#estat-general` (pastilla), `#llista-avisos`, `#inici-estic-sol`, `#inici-oxigen`, `#inici-tasques`, `#inici-recordatoris`, `#inici-diari-avui`
-- Medicació agrupa per `moment`: esmorzar→Matí, dinar→Migdia, sopar→Nit, altres→Puntual, continu→Altres
+- Medicació agrupa per `moments` (array): esmorzar→Matí, dinar→Migdia, sopar→Nit, altres→Puntual, continu→Altres
+- `normMoments(m)` — helper compatibilitat: retorna array des de `m.moments` o `m.moment` (string antic)
 - Diari: `ESTAT_DIARI` = `{ok, revisar, critic}`, màx 90 entrades, `dataDiariEditant` + `estatDiariActual` com a estat global
 - Estic Sol: `duradaSeleccionada` (1-4h), `countdownInterval` per al comptador, `confirmarEsticBe()` no requereix password
 - Push: `VAPID_PUBLIC_KEY` constant a main.js, `urlBase64ToUint8Array()` per convertir, `subscripcioActual` com a estat global
