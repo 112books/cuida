@@ -480,5 +480,16 @@
       "horari": "Dj 15:30-18:30h"
     }
   ],
-  "diari": []
+  "diari": [
+    {
+      "data": "2026-05-26",
+      "estat": "ok",
+      "text": "S’inicia el funcionament de la beta 2 d’aquesta App",
+      "constants": {
+        "tensio": "",
+        "saturacio": "",
+        "pes": ""
+      }
+    }
+  ]
 }
