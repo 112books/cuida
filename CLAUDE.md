@@ -1,6 +1,6 @@
 # CLAUDE.md — Guia del projecte Cuida
 
-## ESTAT ACTUAL (26 maig 2026) — Beta 2
+## ESTAT ACTUAL (26 maig 2026) — Beta 2 ✓ tancada i sincronitzada
 
 App PWA per coordinar cura del Joan (cardiorespiratori, oxigen, morfina, PADES).
 Backend: **GitHub API** (llegeix/escriu `app/dades.json` al repo privat via Cloudflare Pages Functions).
@@ -17,8 +17,8 @@ Backend: **GitHub API** (llegeix/escriu `app/dades.json` al repo privat via Clou
 ### Estat dels repos
 
 - **`main` local** = privat amb dades reals del Joan
-- **`origin/main`** = plantilla buida per a ús públic (sense dades, sense foto, sense docs interns)
-- Per desplegar al públic: crear branca `public`, fer neteja, force push a `origin/main`
+- **`origin/main`** = plantilla buida per a ús públic (sincronitzat amb Beta 2 el 26 maig 2026)
+- Per desplegar al públic: crear branca `public-sync`, fer neteja, force push a `origin/main`, esborrar branca
 - **NO fer `git push origin main` directament** — sobreescriuria amb dades privades
 
 ### Flux de dades (GitHub API)
