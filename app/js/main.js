@@ -762,7 +762,7 @@ function renderitzarDiari() {
     html += '<button class="btn-estat-diari" data-estat="' + key + '" onclick="seleccionarEstatDiari(\'' + key + '\')">' + val.text + '</button>';
   }
   html += '</div>';
-  html += '<div class="camp"><label>Notes del dia</label><textarea id="diari-text" rows="4" placeholder="Com ha anat el dia? Novetats, símptomes, estat anímic..."></textarea></div>';
+  html += '<div class="camp"><label>Notes del dia</label><textarea id="diari-text" rows="6" placeholder="Com ha anat el dia? Novetats, símptomes, estat anímic..."></textarea></div>';
   html += '<details style="margin-bottom:.6rem"><summary style="font-size:.78rem;color:#777;cursor:pointer;padding:.3rem 0">Constants (opcional)</summary>';
   html += '<div class="diari-constants-grup" style="margin-top:.4rem">';
   html += '<div class="camp"><label>Tensió arterial</label><input type="text" id="diari-tensio" placeholder="ex: 120/80"></div>';

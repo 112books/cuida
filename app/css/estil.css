@@ -135,8 +135,11 @@ body>header{padding:1rem 1rem .5rem;position:sticky;top:0;z-index:100;background
 .entrada-diari-resum{font-size:.78rem;color:#555;line-height:1.4;margin-top:.2rem}
 .entrada-constants{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.35rem}
 .constant-item{font-size:.7rem;background:#f0f0f0;border-radius:4px;padding:.15rem .4rem;color:#555}
-.diari-estat-seleccio{display:flex;gap:.4rem;margin:.4rem 0 .6rem}
-.btn-estat-diari{flex:1;padding:.5rem .3rem;border:1px solid #e0e0e0;border-radius:8px;background:#fff;cursor:pointer;font-size:.78rem;font-weight:500;text-align:center;transition:all .15s}
+.diari-estat-seleccio{display:flex;gap:.5rem;margin:.5rem 0 1.1rem}
+.btn-estat-diari{flex:1;padding:.75rem .3rem;border:2px solid #e0e0e0;border-radius:10px;background:#fff;cursor:pointer;font-size:.95rem;font-weight:600;text-align:center;transition:all .15s;line-height:1.3}
+#form-diari .camp{margin-bottom:.5rem}
+#form-diari .camp label{display:block;font-size:.85rem;color:#555;font-weight:600;margin-bottom:.4rem}
+#form-diari textarea{width:100%;padding:.75rem;border:2px solid #e0e0e0;border-radius:8px;font-size:1.05rem;font-family:inherit;background:#fff;color:#1a1a1a;resize:vertical;min-height:7rem;-webkit-appearance:none;box-sizing:border-box;line-height:1.55}
 .btn-estat-diari.actiu.estat-ok{background:#d4edda;border-color:#1a6630;color:#1a6630;font-weight:700}
 .btn-estat-diari.actiu.estat-revisar{background:#fff3cd;border-color:#7d5a00;color:#7d5a00;font-weight:700}
 .btn-estat-diari.actiu.estat-critic{background:#f8d7da;border-color:#7a1c24;color:#7a1c24;font-weight:700}
