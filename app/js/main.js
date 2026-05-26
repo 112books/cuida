@@ -213,13 +213,22 @@ function renderitzarUrgencies() {
   }).join('');
 }
 
+function normMoments(m) {
+  if (Array.isArray(m.moments) && m.moments.length) return m.moments;
+  if (m.moment) return [m.moment];
+  return [];
+}
+
 function renderitzarMedicacio() {
   if (!dadesApp) return;
   const grups = { esmorzar: [], dinar: [], sopar: [], altres: [], continu: [] };
   const etiquetes = { esmorzar: 'Matí', dinar: 'Migdia', sopar: 'Nit', altres: 'Puntual', continu: 'Altres' };
   dadesApp.medicacio.forEach(m => {
-    const k = grups[m.moment] ? m.moment : 'altres';
-    grups[k].push(m);
+    const moments = normMoments(m);
+    if (!moments.length) { grups.altres.push(m); return; }
+    let assignat = false;
+    moments.forEach(k => { if (grups[k]) { grups[k].push(m); assignat = true; } });
+    if (!assignat) grups.altres.push(m);
   });
 
   // Grups simplificats (resum per a la cuidadora)
@@ -475,14 +484,12 @@ function itemMedicacioHTML(m, i) {
     '<button class="btn-eliminar-item" onclick="eliminarItem(\'f-medicacio\',\'med-' + i + '\')" title="Eliminar">' + ICONS.trash + '</button>' +
     '<div class="camp"><label>Nom del medicament</label><input type="text" class="med-nom" value="' + esc(m.nom || '') + '"></div>' +
     '<div class="camp"><label>Dosi</label><input type="text" class="med-dosi" value="' + esc(m.dosi || '') + '"></div>' +
-    '<div class="camp"><label>Moment del dia</label><select class="med-moment">' +
-    '<option value=""' + (!m.moment ? ' selected' : '') + '>Selecciona...</option>' +
-    '<option value="esmorzar"' + (m.moment === 'esmorzar' ? ' selected' : '') + '>Matí</option>' +
-    '<option value="dinar"' + (m.moment === 'dinar' ? ' selected' : '') + '>Migdia</option>' +
-    '<option value="sopar"' + (m.moment === 'sopar' ? ' selected' : '') + '>Nit</option>' +
-    '<option value="altres"' + (m.moment === 'altres' ? ' selected' : '') + '>Puntual</option>' +
-    '<option value="continu"' + (m.moment === 'continu' ? ' selected' : '') + '>Continu / 24h</option>' +
-    '</select></div>' +
+    '<div class="camp"><label>Moment del dia</label>' +
+    '<div class="med-moments-checks">' +
+    [['esmorzar','Matí'],['dinar','Migdia'],['sopar','Nit'],['altres','Puntual'],['continu','Continu / 24h']].map(([v,l]) =>
+      '<label class="check-moment"><input type="checkbox" class="med-moment-check" value="' + v + '"' + (normMoments(m).includes(v) ? ' checked' : '') + '> ' + l + '</label>'
+    ).join('') +
+    '</div></div>' +
     '<div class="camp"><label>Horari / Pauta</label><input type="text" class="med-horari" value="' + esc(m.horari || '') + '"></div>' +
     '<div class="camp"><label>Via</label><input type="text" class="med-via" value="' + esc(m.via || '') + '"></div>' +
     '<div class="camp"><label>Per a qu&egrave;</label><input type="text" class="med-peraque" value="' + esc(m.per_a_que || '') + '"></div>' +
@@ -535,7 +542,7 @@ function afegirTasca() {
 function afegirMedicament() {
   const cnt = document.getElementById('f-medicacio');
   const i = cnt.children.length;
-  cnt.insertAdjacentHTML('beforeend', itemMedicacioHTML({ nom: '', dosi: '', horari: '', via: '', per_a_que: '', notes: '', moment: '' }, i));
+  cnt.insertAdjacentHTML('beforeend', itemMedicacioHTML({ nom: '', dosi: '', horari: '', via: '', per_a_que: '', notes: '', moments: [] }, i));
 }
 
 function recollirDadesFormulari() {
@@ -588,7 +595,7 @@ function recollirDadesFormulari() {
     via: (el.querySelector('.med-via') || {}).value || '',
     per_a_que: (el.querySelector('.med-peraque') || {}).value || '',
     notes: (el.querySelector('.med-notes') || {}).value || '',
-    moment: (el.querySelector('.med-moment') || {}).value || '',
+    moments: Array.from(el.querySelectorAll('.med-moment-check:checked')).map(cb => cb.value),
   }));
 
   dades.tasques_cuidadora = Array.from(document.querySelectorAll('#f-tasques .item-llista'))
