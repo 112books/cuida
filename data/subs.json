@@ -1,0 +1,12 @@
+[
+  {
+    "nom": "Joanot",
+    "subscription": {
+      "endpoint": "https://web.push.apple.com/QGSuSCLc2Sg1H95_c12h-Pv_gYnyHEQ9Lm7jsaKtAaeb34mMWBrG-xlr-ytaZIvemLZEdZH104Ny--4zRv8K06MI-fImPgflHFtMVQNmH9nayZ1tN_DD1KfCBPYHcPGKUxzjQF86A6R0IalQSAszy81bJIz5UnEOdXMo7AE8Vhc",
+      "keys": {
+        "p256dh": "BHeUU4h878YSTSHZTr0akby41K6Wo1QF4FKpInMO6rAabyZ44w8y1Wmyah9AljTQ8QLzs_8gAz0qgdqThyie0U4",
+        "auth": "9a2eJrf8yX52ikFmktM21Q"
+      }
+    }
+  }
+]
