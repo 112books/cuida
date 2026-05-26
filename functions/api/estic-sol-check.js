@@ -1,4 +1,4 @@
-const REPO = '112books/cuida-avi-joan';
+const REPO = '112books/cuida-avi-joan'; // v2
 const DADES_FILE = 'app/dades.json';
 const SUBS_FILE = 'data/subs.json';
 const GH = 'https://api.github.com';
