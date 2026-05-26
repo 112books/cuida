@@ -144,5 +144,15 @@ body>header{padding:1rem 1rem .5rem;position:sticky;top:0;z-index:100;background
 .estat-recordatoris-actiu{background:#f0faf4;border-left:3px solid #1a6630;padding:.5rem 1rem}
 .diari-constants-grup{margin-top:.5rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem}
 .invitacio-diari{border-left:3px solid #b0b8c1;background:#fafafa}
+.targeta-estic-sol{background:#fff}
+.targeta-estic-sol-actiu{background:#fff8f0;border-left:3px solid #e67e22}
+.targeta-sos{background:#fdf0f0;border-left:3px solid #d9534f}
+.targeta-sos-pendent{background:#fff3cd;border-left:3px solid #f0ad4e}
+.estic-sol-durades{display:flex;gap:.4rem;margin-top:.4rem}
+.btn-durada{flex:1;padding:.45rem;border:1px solid #e0e0e0;border-radius:8px;background:#fff;cursor:pointer;font-size:.82rem;font-weight:500;text-align:center;transition:all .15s}
+.btn-durada.actiu{background:#222;border-color:#222;color:#fff;font-weight:700}
+.btn-estic-be{display:block;width:100%;padding:.9rem;background:#1a6630;color:#fff;border:none;border-radius:10px;font-size:1.1rem;font-weight:700;cursor:pointer;letter-spacing:.01em;margin-bottom:.5rem}
+.btn-estic-be:active{opacity:.85}
+.countdown-estic-sol{font-size:.78rem;background:#fff3cd;color:#7d5a00;padding:.2rem .6rem;border-radius:20px;font-weight:600}
 .btn-link-petit{background:none;border:none;color:#999;font-size:.72rem;cursor:pointer;padding:.25rem 0;text-decoration:underline;display:block;margin-top:.3rem}
 @media print{#pantalla-login,body>header,#navegacio-inferior,.peu-vista,.btn-imprimir,.btn-trucar,.btn-facetime,.btn-trucar-emergencia,.btn-emergencia,.btn-responsable,.btn-trucar-pas,.btn-secundari{display:none!important}body{padding:0;background:#fff;font-size:14pt;color:#000}#contingut{padding:0;max-width:none}.vista{display:none!important}.vista.activa{display:block!important}.targeta,.grup-medicacio,.seccio-config{background:#fff;border-radius:0;box-shadow:none;border-bottom:1px solid #ccc;margin-bottom:.5rem;padding:.5rem 0}.targeta h3{font-size:12pt;font-weight:700}.contacte-info strong{font-size:12pt}.contacte-info p,.contacte-info small{font-size:11pt;color:#000}.item-medicacio h3{font-size:12pt;font-weight:700}.item-medicacio p,.item-medicacio small{font-size:11pt;color:#000}.grup-medicacio-titol{font-size:11pt;font-weight:700;color:#000;border-bottom:1px solid #000}.item-medicacio-resum{font-size:11pt}.med-nom-resum{font-size:11pt;font-weight:700}.med-dosi-resum{font-size:10pt;color:#333}.alerta-medicacio{font-size:10pt;color:#000;font-weight:700}.estat-pill{border:1px solid #000;background:#fff;color:#000}.vista h2{font-size:13pt;color:#000;border-bottom:1px solid #000;margin-bottom:.75rem}}

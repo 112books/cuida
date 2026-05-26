@@ -109,6 +109,7 @@ function renderitzarInici() {
   const ox = dadesApp.oxigen || {};
   const fluxText = ox.flux !== undefined && ox.flux !== '' ? String(ox.flux) + ' l/min' : 'No especificat';
   const tasques = dadesApp.tasques_cuidadora || [];
+  renderitzarWidgetEsticSol();
   renderitzarInvitacioDiari();
 
   document.getElementById('inici-tasques').innerHTML = tasques.filter(t => t).length
@@ -600,6 +601,115 @@ function recollirDadesFormulari() {
   };
 
   return dades;
+}
+
+// ── Mode Estic Sol ──────────────────────────────────────────────────────────
+
+let duradaSeleccionada = 2;
+let countdownInterval = null;
+
+function renderitzarWidgetEsticSol() {
+  const el = document.getElementById('inici-estic-sol');
+  if (!el || !dadesApp) return;
+  const es = dadesApp.estic_sol || {};
+
+  if (es.alerta) {
+    el.innerHTML = '<div class="targeta targeta-sos">' +
+      '<h3>⚠️ Alerta enviada a la família</h3>' +
+      '<p style="font-size:.82rem;margin:.35rem 0 .75rem">S\'ha notificat a la família. Confirmeu que tot va bé.</p>' +
+      '<button class="btn-primari" onclick="tancarAlertaEsticSol()">Tancar alerta — tot bé</button>' +
+      '</div>';
+    return;
+  }
+
+  if (es.actiu && es.fins) {
+    const fins = new Date(es.fins);
+    const msRestants = fins - Date.now();
+    if (msRestants <= 0) {
+      el.innerHTML = '<div class="targeta targeta-sos-pendent">' +
+        '<h3>⚠️ Timer esgotat</h3>' +
+        '<p style="font-size:.82rem;margin:.35rem 0 .75rem">La família serà avisada en el proper cicle de comprovació (màx. 15 min).</p>' +
+        '<button class="btn-secundari" onclick="confirmarEsticBe()">Estic bé — cancel·lar alerta</button>' +
+        '</div>';
+      return;
+    }
+
+    const fiHora = fins.toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+    el.innerHTML = '<div class="targeta targeta-estic-sol-actiu">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem">' +
+      '<h3 style="margin:0">Mode Estic sol actiu</h3>' +
+      '<span id="estic-sol-countdown" class="countdown-estic-sol">' + formatarComptador(msRestants) + '</span>' +
+      '</div>' +
+      '<p style="font-size:.78rem;color:#666;margin-bottom:.75rem">Fins a les ' + fiHora + '. Si no confirmes que estàs bé, s\'avisarà la família.</p>' +
+      '<button class="btn-estic-be" onclick="confirmarEsticBe()">✓ &nbsp;Estic bé</button>' +
+      '<button class="btn-link-petit" onclick="cancellarEsticSol()">Cancel·lar el mode</button>' +
+      '</div>';
+
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      const ms = new Date(dadesApp.estic_sol.fins) - Date.now();
+      if (ms <= 0) { clearInterval(countdownInterval); countdownInterval = null; renderitzarWidgetEsticSol(); return; }
+      const el2 = document.getElementById('estic-sol-countdown');
+      if (el2) el2.textContent = formatarComptador(ms);
+    }, 30000);
+    return;
+  }
+
+  el.innerHTML = '<div class="targeta targeta-estic-sol">' +
+    '<h3>Mode Estic sol</h3>' +
+    '<p style="font-size:.8rem;color:#666;margin:.25rem 0 .6rem">Activa quan el pacient quedi sol. S\'avisa la família si no confirma que està bé a temps.</p>' +
+    '<div class="estic-sol-durades">' +
+    [1,2,3,4].map(h => '<button class="btn-durada' + (h === duradaSeleccionada ? ' actiu' : '') + '" data-h="' + h + '" onclick="seleccionarDurada(' + h + ')">' + h + 'h</button>').join('') +
+    '</div>' +
+    '<button class="btn-primari" onclick="activarEsticSol()" style="margin-top:.6rem;width:100%">' +
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icn-sm"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+    ' Activar</button>' +
+    '</div>';
+}
+
+function formatarComptador(ms) {
+  const totalMins = Math.ceil(ms / 60000);
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  return h > 0 ? h + 'h ' + m + 'min' : m + ' min';
+}
+
+function seleccionarDurada(h) {
+  duradaSeleccionada = h;
+  document.querySelectorAll('.btn-durada').forEach(b => b.classList.toggle('actiu', parseInt(b.dataset.h) === h));
+}
+
+async function activarEsticSol() {
+  if (!passwordSessio) {
+    const pw = prompt('Introdueix la contrasenya per activar:');
+    if (!pw) return;
+    passwordSessio = pw;
+  }
+  const ara = new Date();
+  const fins = new Date(ara.getTime() + duradaSeleccionada * 3600000);
+  const dades = JSON.parse(JSON.stringify(dadesApp));
+  dades.estic_sol = { actiu: true, fins: fins.toISOString(), activat: ara.toISOString(), alerta: false };
+  const res = await Emmagatzematge.guardarRemot(dades, passwordSessio);
+  if (res.ok) { dadesApp = dades; renderitzarWidgetEsticSol(); }
+  else { alert('Error: ' + (res.error || 'Error desconegut')); if (res.error && res.error.includes('ontrasenya')) passwordSessio = null; }
+}
+
+async function confirmarEsticBe() {
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+  try {
+    const r = await fetch('/api/estic-be', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    if (r.ok) { if (dadesApp.estic_sol) dadesApp.estic_sol = { actiu: false, fins: null, activat: null, alerta: false }; }
+  } catch (e) { if (dadesApp.estic_sol) dadesApp.estic_sol = { actiu: false, fins: null, activat: null, alerta: false }; }
+  renderitzarWidgetEsticSol();
+}
+
+function cancellarEsticSol() { confirmarEsticBe(); }
+
+async function tancarAlertaEsticSol() {
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+  try { await fetch('/api/estic-be', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }); } catch (e) {}
+  if (dadesApp.estic_sol) dadesApp.estic_sol = { actiu: false, fins: null, activat: null, alerta: false };
+  renderitzarWidgetEsticSol();
 }
 
 // ── Diari de seguiment ──────────────────────────────────────────────────────

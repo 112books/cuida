@@ -1,0 +1,18 @@
+name: Check Mode Estic Sol
+
+on:
+  schedule:
+    # Comprova cada 15 minuts si el timer ha expirat
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comprovar mode estic sol
+        run: |
+          curl -s -X POST "${{ secrets.CUIDA_URL }}/api/estic-sol-check" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --fail-with-body

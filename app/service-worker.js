@@ -7,24 +7,36 @@ self.addEventListener('push',e=>{
     const MOMENTS={esmorzar:'Pastilles del matí',dinar:'Pastilles del migdia',sopar:'Pastilles del vespre'};
     const hora=new Date().getHours();
     const moment=hora<11?'esmorzar':hora<17?'dinar':'sopar';
-    let meds='Consulta la medicació a l\'app';
     try{
       const r=await fetch('/api/dades');
       if(r.ok){
         const d=await r.json();
+        // SOS té prioritat màxima
+        if(d.estic_sol&&d.estic_sol.alerta){
+          const nom=(d.pacient&&d.pacient.nom)||'El pacient';
+          await self.registration.showNotification('⚠️ ALERTA — Mode Estic sol',{
+            body:nom+' no ha confirmat que estava bé. Comprova-ho immediatament.',
+            icon:'/icones/icon-192.png',badge:'/icones/icon-192.png',
+            tag:'sos-estic-sol',requireInteraction:true,
+            vibrate:[300,100,300,100,300,100,300],
+            data:{url:'/'}
+          });
+          return;
+        }
+        // Medicació
         const llista=(d.medicacio||[]).filter(m=>m.moment===moment&&m.nom).map(m=>m.nom);
-        if(llista.length)meds='• '+llista.join('\n• ');
-        // Comprovar si falta nota del diari avui
+        const meds=llista.length?'• '+llista.join('\n• '):'Consulta la medicació a l\'app';
+        await self.registration.showNotification(MOMENTS[moment],{body:meds,icon:'/icones/icon-192.png',badge:'/icones/icon-192.png',tag:'med-'+moment,data:{url:'/'}});
+        // Diari (només al matí si no hi ha nota)
         const avui=new Date().toISOString().split('T')[0];
         const teDiari=(d.diari||[]).some(e=>e.data===avui);
-        await self.registration.showNotification(MOMENTS[moment],{body:meds,icon:'/icones/icon-192.png',badge:'/icones/icon-192.png',tag:'med-'+moment,data:{url:'/'}});
         if(!teDiari&&hora<11){
-          await self.registration.showNotification('Diari de seguiment',{body:'Ningú ha escrit la nota d\'avui. Afegeix-la ara.',icon:'/icones/icon-192.png',tag:'diari-avui',data:{url:'/?vista=diari'}});
+          await self.registration.showNotification('Diari de seguiment',{body:'Ningú ha escrit la nota d\'avui.',icon:'/icones/icon-192.png',tag:'diari-avui',data:{url:'/'}});
         }
         return;
       }
     }catch(err){}
-    await self.registration.showNotification(MOMENTS[moment],{body:meds,icon:'/icones/icon-192.png',tag:'med-'+moment});
+    await self.registration.showNotification(MOMENTS[moment],{body:'Consulta la medicació a l\'app',icon:'/icones/icon-192.png',tag:'med-'+moment});
   })());
 });
 self.addEventListener('notificationclick',e=>{
