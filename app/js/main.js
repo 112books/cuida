@@ -302,7 +302,8 @@ function renderitzarConfiguracio() {
     '<div class="guia-item"><strong>Com editar</strong> — Prem "Editar dades", introdueix la contrasenya, modifica els camps i prem "Guardar a Cloudflare".</div>' +
     '<div class="guia-item"><strong>Quan ho veuen els altres</strong> — En la propera recàrrega de la pàgina, tots els dispositius carreguen les dades actualitzades.</div>' +
     '<div class="guia-item"><strong>Backup</strong> — Utilitza "Exportar JSON" per guardar una còpia local. No substitueix el guardat a Cloudflare.</div>' +
-    '<div class="guia-item"><strong>Graella</strong> — Els horaris dels cuidadors venen de la secció "Cuidadors" del formulari d\'edició.</div>',
+    '<div class="guia-item"><strong>Graella</strong> — Els horaris dels cuidadors venen de la secció "Cuidadors" del formulari d\'edició.</div>' +
+    '<div class="guia-item"><strong>Medicació</strong> — Cada medicament pot tenir un o més moments del dia marcats (Matí, Migdia, Nit, Puntual, Continu). Apareix a tots els grups marcats.</div>',
     false
   );
 
@@ -311,14 +312,14 @@ function renderitzarConfiguracio() {
     '<div class="guia-item"><strong>Graella</strong> — Horari dels cuidadors de l\'empresa</div>' +
     '<div class="guia-item"><strong>Contactes</strong> — Empresa, cuidadors, metges, proveïdors i família amb botons de trucada</div>' +
     '<div class="guia-item"><strong>Urgències</strong> — Protocols pas a pas. Botó vermell truca al 112</div>' +
-    '<div class="guia-item"><strong>Medicació</strong> — Llista completa amb dosis, horaris i alertes</div>' +
+    '<div class="guia-item"><strong>Medicació</strong> — Medicaments agrupats per àpat (Matí / Migdia / Nit / Puntual / Altres) + fitxa completa</div>' +
     '<div class="guia-item"><strong>Diari</strong> — Notes diàries de seguiment amb estat i constants vitals</div>' +
     '<div class="guia-item"><strong>Config</strong> — Editor de dades, backup i guies</div>',
     false
   );
 
   h += seccioConfigurable('Crèdits',
-    '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem"><strong>Cuida Beta 01</strong> — Webapp de coordinació familiar per a malalts a casa. Dissenyada i creada per <a href="https://linuxbcn.com/ca/" target="_blank" style="color:#222">LinuxBCN.cat</a> a partir d\'una necessitat real.</p>' +
+    '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem"><strong>Cuida Beta 2</strong> — Webapp de coordinació familiar per a malalts a casa. Dissenyada i creada per <a href="https://linuxbcn.com/ca/" target="_blank" style="color:#222">LinuxBCN.cat</a> a partir d\'una necessitat real.</p>' +
     '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem">→ <a href="https://linuxbcn.com/ca/cuida/" target="_blank" style="color:#222">Llegir l\'article complet a linuxbcn.com</a></p>' +
     '<p style="font-size:.82rem;line-height:1.6;margin-bottom:.5rem">El codi és obert (MIT). Per adaptar-la per a la teva família: <a href="https://github.com/112books/cuida" target="_blank" style="color:#222">github.com/112books/cuida</a>. De bon grat t\'ajudem.</p>' +
     '<p style="font-size:.75rem;color:#999">Llicència MIT · 2026 · <a href="https://linuxbcn.com/ca/" target="_blank" style="color:#999">linuxbcn.com</a></p>',
@@ -326,11 +327,10 @@ function renderitzarConfiguracio() {
   );
 
   h += seccioConfigurable('Configuració inicial Cloudflare (admin)',
-    '<p style="font-size:.85rem;color:#666;margin-bottom:.75rem">Passos per activar el guardat a Cloudflare (un sol cop, al dashboard):</p>' +
-    '<div class="guia-item"><strong>Pas 1 — Crear KV namespace</strong><br>Dashboard → Workers &amp; Pages → KV → Create namespace → Nom: <code>CUIDA_DADES</code></div>' +
-    '<div class="guia-item"><strong>Pas 2 — Variable de contrasenya</strong><br>Pages → cuida-avi-joan → Settings → Environment variables → Afegir Secret: <code>CUIDA_PASSWORD</code> = contrasenya</div>' +
-    '<div class="guia-item"><strong>Pas 3 — Lligar KV al projecte</strong><br>Pages → Settings → Functions → KV namespace bindings → Variable: <code>CUIDA_DADES</code></div>' +
-    '<div class="guia-item"><strong>Pas 4 — Desplegar</strong><br><code>git push private main</code> → Cloudflare redespega automàticament</div>' +
+    '<p style="font-size:.85rem;color:#666;margin-bottom:.75rem">Passos per activar el guardat (un sol cop, al dashboard de Cloudflare i GitHub):</p>' +
+    '<div class="guia-item"><strong>Pas 1 — Variables d\'entorn Cloudflare</strong><br>Pages → Settings → Environment variables → Afegir: <code>GITHUB_TOKEN</code>, <code>CUIDA_PASSWORD</code>, <code>VAPID_PUBLIC_KEY</code>, <code>VAPID_PRIVATE_KEY</code>, <code>VAPID_SUBJECT</code>, <code>CRON_SECRET</code></div>' +
+    '<div class="guia-item"><strong>Pas 2 — Secrets GitHub Actions</strong><br>Repo → Settings → Secrets → Afegir: <code>CRON_SECRET</code> (mateix valor que Cloudflare), <code>CUIDA_URL</code> (URL del projecte Cloudflare)</div>' +
+    '<div class="guia-item"><strong>Pas 3 — Desplegar</strong><br><code>git push private main</code> → Cloudflare redespega automàticament</div>' +
     '<div class="guia-item"><strong>Verificació</strong><br>Obre <code>/api/dades</code> al navegador — hauries de veure JSON</div>',
     false
   );
