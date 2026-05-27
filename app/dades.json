@@ -205,12 +205,13 @@
     {
       "nom": "Hydrapres 50mg",
       "dosi": "1 comprimit",
-      "horari": "Cada 24 hores",
+      "horari": "Cada 12 hores",
       "via": "Oral",
       "per_a_que": "Tensió arterial",
       "notes": "Pla de medicació 08/05/2026",
       "moments": [
-        "esmorzar"
+        "esmorzar",
+        "sopar"
       ]
     },
     {
