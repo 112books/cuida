@@ -294,7 +294,7 @@
       ]
     },
     {
-      "nom": "Oxigen continu",
+      "nom": "Oxigen continu (2,5 litres)",
       "dosi": "Flux segons pauta",
       "horari": "24 hores",
       "via": "Ulleres nasals",
@@ -312,7 +312,9 @@
       "per_a_que": "Restrenyiment",
       "notes": "Es pot empassar directament o diluir en aigua.",
       "moments": [
-        "dinar"
+        "esmorzar",
+        "dinar",
+        "sopar"
       ]
     }
   ],
@@ -504,7 +506,7 @@
     "responsable": "Rosa"
   },
   "oxigen": {
-    "flux": "2.5",
+    "flux": "2.5 a la bombona que té per si se'n va la llum només es pot posar 2 o 3 i hem posat 3 litres",
     "notes": "Ulleres nasals. 24h continu. Contenidor humidificador: reomplir regularment amb AIGUA FILTRADA."
   },
   "cuidadors": [
