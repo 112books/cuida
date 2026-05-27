@@ -272,14 +272,14 @@
       ]
     },
     {
-      "nom": "Oramorph",
+      "nom": "Oramorph (pauta actual: 5ml)",
       "dosi": "Segons pauta PADES",
       "horari": "Si cal",
       "via": "Oral",
       "per_a_que": "Dolor irruptiu",
       "notes": "Morfina. Preguntar PADES dosi exacta.",
       "moments": [
-        "altres"
+        "dinar"
       ]
     },
     {
