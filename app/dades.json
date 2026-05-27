@@ -216,13 +216,14 @@
     },
     {
       "nom": "Furosemida VIR 40mg",
-      "dosi": "1 comprimit",
+      "dosi": "2 comprimit",
       "horari": "Cada 24 hores",
       "via": "Oral",
       "per_a_que": "Retenció de líquids",
       "notes": "Pla de medicació 08/05/2026",
       "moments": [
-        "esmorzar"
+        "esmorzar",
+        "sopar"
       ]
     },
     {
