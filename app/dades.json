@@ -130,7 +130,9 @@
       "via": "Oral",
       "per_a_que": "Protecció gàstrica",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "esmorzar"
+      "moments": [
+        "esmorzar"
+      ]
     },
     {
       "nom": "Forxiga 10mg",
@@ -139,7 +141,9 @@
       "via": "Oral",
       "per_a_que": "Diabetis",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "esmorzar"
+      "moments": [
+        "esmorzar"
+      ]
     },
     {
       "nom": "Xarelto 15mg",
@@ -148,7 +152,9 @@
       "via": "Oral",
       "per_a_que": "Anticoagulant",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "dinar"
+      "moments": [
+        "dinar"
+      ]
     },
     {
       "nom": "Losartan Silanes 50mg",
@@ -157,7 +163,9 @@
       "via": "Oral",
       "per_a_que": "Tensió arterial",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "esmorzar"
+      "moments": [
+        "esmorzar"
+      ]
     },
     {
       "nom": "Atorvastatina Almus Pharma 40mg",
@@ -166,7 +174,9 @@
       "via": "Oral",
       "per_a_que": "Colesterol",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "sopar"
+      "moments": [
+        "sopar"
+      ]
     },
     {
       "nom": "Alopurinol Pensa 100mg",
@@ -175,7 +185,9 @@
       "via": "Oral",
       "per_a_que": "Àcid úric",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "esmorzar"
+      "moments": [
+        "esmorzar"
+      ]
     },
     {
       "nom": "Quetiapina Normon 25mg",
@@ -184,7 +196,9 @@
       "via": "Oral",
       "per_a_que": "Son/ansietat",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "sopar"
+      "moments": [
+        "sopar"
+      ]
     },
     {
       "nom": "Hydrapres 50mg",
@@ -193,7 +207,9 @@
       "via": "Oral",
       "per_a_que": "Tensió arterial",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "esmorzar"
+      "moments": [
+        "esmorzar"
+      ]
     },
     {
       "nom": "Furosemida VIR 40mg",
@@ -202,7 +218,9 @@
       "via": "Oral",
       "per_a_que": "Retenció de líquids",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "esmorzar"
+      "moments": [
+        "esmorzar"
+      ]
     },
     {
       "nom": "MST Continus 10mg",
@@ -211,7 +229,9 @@
       "via": "Oral",
       "per_a_que": "Dolor crònic",
       "notes": "Morfina d'alliberació sostinguda. Pauta PADES.",
-      "moment": "altres"
+      "moments": [
+        "altres"
+      ]
     },
     {
       "nom": "Paracetamol Cinfa 1g",
@@ -220,7 +240,9 @@
       "via": "Oral",
       "per_a_que": "Dolor/febre",
       "notes": "No superar 3g/dia. Cura amb funció hepàtica.",
-      "moment": "altres"
+      "moments": [
+        "altres"
+      ]
     },
     {
       "nom": "Atrovent 20mcg/dosi",
@@ -229,7 +251,9 @@
       "via": "Inhalada",
       "per_a_que": "Dispnea",
       "notes": "Tractament curta durada. Pla de medicació 08/05/2026",
-      "moment": "altres"
+      "moments": [
+        "altres"
+      ]
     },
     {
       "nom": "Amoxicilina / Àcid Clavulànic Viatris",
@@ -238,7 +262,9 @@
       "via": "Oral",
       "per_a_que": "Infecció",
       "notes": "Antibiòtic. Tractament curta durada. Només si prescripció.",
-      "moment": "altres"
+      "moments": [
+        "altres"
+      ]
     },
     {
       "nom": "Oramorph",
@@ -247,7 +273,9 @@
       "via": "Oral",
       "per_a_que": "Dolor irruptiu",
       "notes": "Morfina. Preguntar PADES dosi exacta.",
-      "moment": "altres"
+      "moments": [
+        "altres"
+      ]
     },
     {
       "nom": "Spiolto Respimat 2.5mcg/2.5mcg",
@@ -256,7 +284,9 @@
       "via": "Inhalada",
       "per_a_que": "MPOC",
       "notes": "Pla de medicació 08/05/2026",
-      "moment": "esmorzar"
+      "moments": [
+        "esmorzar"
+      ]
     },
     {
       "nom": "Oxigen continu",
@@ -265,7 +295,9 @@
       "via": "Ulleres nasals",
       "per_a_que": "Insuficiència respiratòria",
       "notes": "Verificar proveïdor i cabal.",
-      "moment": "continu"
+      "moments": [
+        "continu"
+      ]
     },
     {
       "nom": "Emuliqe Laxante 487,26mg",
@@ -274,7 +306,9 @@
       "via": "Oral",
       "per_a_que": "Restrenyiment",
       "notes": "Es pot empassar directament o diluir en aigua.",
-      "moment": "dinar"
+      "moments": [
+        "dinar"
+      ]
     }
   ],
   "voluntats_anticipades": {
