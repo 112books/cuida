@@ -75,8 +75,8 @@ export async function onRequest(context) {
 
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
-  const cronSecret = request.headers.get('X-Cron-Secret');
-  if (!cronSecret || cronSecret !== env.CRON_SECRET) {
+  const cronSecret = (request.headers.get('X-Cron-Secret') || '').trim();
+  if (!cronSecret || cronSecret !== (env.CRON_SECRET || '').trim()) {
     return new Response('Unauthorized', { status: 401 });
   }
 

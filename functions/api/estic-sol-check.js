@@ -56,8 +56,8 @@ export async function onRequest(context) {
 
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
-  const cronSecret = request.headers.get('X-Cron-Secret');
-  if (!cronSecret || cronSecret !== env.CRON_SECRET) return new Response('Unauthorized', { status: 401 });
+  const cronSecret = (request.headers.get('X-Cron-Secret') || '').trim();
+  if (!cronSecret || cronSecret !== (env.CRON_SECRET || '').trim()) return new Response('Unauthorized', { status: 401 });
 
   const { data: dades, sha: dadesSHA } = await llegirJSON(env.GITHUB_TOKEN, DADES_FILE);
   if (!dades) return new Response(JSON.stringify({ ok: false, msg: 'no dades' }), { headers: { 'Content-Type': 'application/json' } });

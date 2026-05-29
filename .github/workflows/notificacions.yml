@@ -13,10 +13,13 @@ on:
 jobs:
   enviar-push:
     runs-on: ubuntu-latest
+    env:
+      CUIDA_URL: ${{ secrets.CUIDA_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Enviar recordatori push
         run: |
-          curl -s -X POST "${{ secrets.CUIDA_URL }}/api/notificacions" \
-            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+          curl -s -X POST "${CUIDA_URL}/api/notificacions" \
+            -H "X-Cron-Secret: ${CRON_SECRET}" \
             -H "Content-Type: application/json" \
             --fail-with-body
