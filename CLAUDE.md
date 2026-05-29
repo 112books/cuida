@@ -1,6 +1,6 @@
 # CLAUDE.md — Guia del projecte Cuida
 
-## ESTAT ACTUAL (26 maig 2026) — Beta 2 ✓ + medicació multi-moment + crons operatius
+## ESTAT ACTUAL (30 maig 2026) — Beta 2 ✓ + medicació multi-moment + crons OIDC
 
 App PWA per coordinar cura del Joan (cardiorespiratori, oxigen, morfina, PADES).
 Backend: **GitHub API** (llegeix/escriu `app/dades.json` al repo privat via Cloudflare Pages Functions).
@@ -41,14 +41,15 @@ Backend: **GitHub API** (llegeix/escriu `app/dades.json` al repo privat via Clou
 | `VAPID_PUBLIC_KEY` | Clau pública VAPID per a Web Push |
 | `VAPID_PRIVATE_KEY` | Clau privada VAPID (JSON JWK) |
 | `VAPID_SUBJECT` | `mailto:linuxbcn@gmail.com` |
-| `CRON_SECRET` | Paraula de pas per autenticar els crons de GitHub Actions |
+| `CRON_SECRET` | (opcional) Fallback per provar crons manualment amb curl |
 
 ### Secrets — GitHub Actions (repo privat)
 
 | Secret | Valor |
 |---|---|
-| `CRON_SECRET` | Igual que a Cloudflare |
 | `CUIDA_URL` | `https://cuida-avi-joan.pages.dev` |
+
+> `CRON_SECRET` ja NO cal a GitHub Actions — els crons s'autentiquen via GitHub OIDC.
 
 ### Backend: Pages Functions (GitHub API)
 
@@ -58,9 +59,20 @@ Totes a `functions/api/`:
 |---|---|---|
 | `dades.js` | GET, POST | Llegeix/escriu `app/dades.json` (requereix `CUIDA_PASSWORD` per POST) |
 | `suscripcions.js` | GET, POST, DELETE | CRUD subscripcions push a `data/subs.json` |
-| `notificacions.js` | POST | Envia push de medicació a tots els subscriptors (requereix `CRON_SECRET`) |
+| `notificacions.js` | POST | Envia push de medicació a tots els subscriptors (auth: GitHub OIDC) |
 | `estic-be.js` | GET, POST | GET retorna estat estic_sol; POST confirma "estic bé" (sense auth) |
-| `estic-sol-check.js` | POST | Comprova si el timer ha expirat, dispara SOS push (requereix `CRON_SECRET`) |
+| `estic-sol-check.js` | POST | Comprova si el timer ha expirat, dispara SOS push (auth: GitHub OIDC) |
+
+### Autenticació crons — GitHub OIDC
+
+Els crons no usen secret compartit. El workflow demana un JWT temporal signat per GitHub (`audience: cuida-cron`), la funció Cloudflare el verifica criptogràficament contra el JWKS públic de GitHub. Cap secret a sincronitzar mai.
+
+Fallback per proves manuals:
+```bash
+curl -X POST https://cuida-avi-joan.pages.dev/api/notificacions \
+  -H "X-Cron-Secret: EL_TEU_SECRET" -H "Content-Type: application/json"
+```
+(requereix `CRON_SECRET` a Cloudflare env vars — opcional)
 
 ### Crons — GitHub Actions
 
