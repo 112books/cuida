@@ -10,16 +10,22 @@ on:
     - cron: '0 19 * * *'
   workflow_dispatch: {}
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   enviar-push:
     runs-on: ubuntu-latest
     env:
       CUIDA_URL: ${{ secrets.CUIDA_URL }}
-      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Enviar recordatori push
         run: |
+          TOKEN=$(curl -sf \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cuida-cron" | jq -r '.value')
           curl -s -X POST "${CUIDA_URL}/api/notificacions" \
-            -H "X-Cron-Secret: ${CRON_SECRET}" \
+            -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/json" \
             --fail-with-body

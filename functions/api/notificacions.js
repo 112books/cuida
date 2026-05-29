@@ -70,13 +70,49 @@ async function enviarPush(sub, privateKeyJWK, publicKey, subject) {
   }
 }
 
+async function autenticat(request, env) {
+  const auth = request.headers.get('Authorization') || '';
+  if (auth.startsWith('Bearer ')) {
+    const token = auth.slice(7).trim();
+    const parts = token.split('.');
+    if (parts.length === 3) {
+      try {
+        const pad = s => s + '='.repeat((4 - s.length % 4) % 4);
+        const header = JSON.parse(atob(pad(parts[0])));
+        const payload = JSON.parse(atob(pad(parts[1])));
+        const aud = payload.aud;
+        const audOk = aud === 'cuida-cron' || (Array.isArray(aud) && aud.includes('cuida-cron'));
+        if (
+          audOk &&
+          payload.iss === 'https://token.actions.githubusercontent.com' &&
+          payload.repository === '112books/cuida-avi-joan' &&
+          payload.exp > Math.floor(Date.now() / 1000)
+        ) {
+          const jwksRes = await fetch('https://token.actions.githubusercontent.com/.well-known/jwks');
+          const { keys } = await jwksRes.json();
+          const jwk = keys.find(k => k.kid === header.kid);
+          if (jwk) {
+            const key = await crypto.subtle.importKey(
+              'jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']
+            );
+            const data = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
+            const sig = Uint8Array.from(atob(parts[2].replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0));
+            if (await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, sig, data)) return true;
+          }
+        }
+      } catch {}
+    }
+  }
+  const cronSecret = (request.headers.get('X-Cron-Secret') || '').trim();
+  return !!(cronSecret && env.CRON_SECRET && cronSecret === env.CRON_SECRET.trim());
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
 
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
-  const cronSecret = (request.headers.get('X-Cron-Secret') || '').trim();
-  if (!cronSecret || cronSecret !== (env.CRON_SECRET || '').trim()) {
+  if (!await autenticat(request, env)) {
     return new Response('Unauthorized', { status: 401 });
   }
 
