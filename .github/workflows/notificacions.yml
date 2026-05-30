@@ -10,22 +10,18 @@ on:
     - cron: '0 19 * * *'
   workflow_dispatch: {}
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   enviar-push:
     runs-on: ubuntu-latest
     env:
       CUIDA_URL: ${{ secrets.CUIDA_URL }}
     steps:
+      - uses: actions/checkout@v4
       - name: Enviar recordatori push
         run: |
-          TOKEN=$(curl -sf \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cuida-cron" | jq -r '.value')
-          curl -s -X POST "${CUIDA_URL}/api/notificacions" \
-            -H "Authorization: Bearer ${TOKEN}" \
-            -H "Content-Type: application/json" \
-            --fail-with-body
+          TOKEN=$(cat .github/workflows/_cron-token.txt)
+          HTTP=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${CUIDA_URL}/api/notificacions" \
+            -H "X-Cron-Token: ${TOKEN}" \
+            -H "Content-Type: application/json")
+          echo "HTTP status: $HTTP"
+          [ "$HTTP" = "200" ] || exit 1
