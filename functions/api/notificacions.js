@@ -1,4 +1,4 @@
-const REPO = '112books/cuida-avi-joan';
+const REPO = '112books/cuida';
 const SUBS_FILE = 'data/subs.json';
 const DADES_FILE = 'app/dades.json';
 const GH = 'https://api.github.com';
@@ -70,7 +70,7 @@ async function enviarPush(sub, privateKeyJWK, publicKey, subject) {
   }
 }
 
-const CRON_TOKEN = '957c7a287f50b48cbd7421b89fcf2fc064bb530280fa0c7c9d501e6489a130c2';
+const CRON_TOKEN = 'POSA-EL-TEU-TOKEN-AQUI';
 
 export async function onRequest(context) {
   const { request, env } = context;

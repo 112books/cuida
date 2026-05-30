@@ -1,4 +1,4 @@
-const REPO = '112books/cuida-avi-joan';
+const REPO = '112books/cuida';
 const SUBS_FILE = 'data/subs.json';
 const GH = 'https://api.github.com';
 
@@ -12,7 +12,7 @@ function ghHeaders(token) {
 }
 
 const ALLOWED_ORIGINS = [
-  'https://cuida-avi-joan.pages.dev',
+  'https://cuida.pages.dev',
   'https://cuida.linuxbcn.cat',
 ];
 

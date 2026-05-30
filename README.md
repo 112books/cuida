@@ -1,165 +1,163 @@
-# Cuida — App PWA per a la coordinació de cures
+# Cuida — Family Caregiving Coordination PWA
 
-**Cuida** és una aplicació web progressiva (PWA) de codi obert per coordinar la cura d'una persona dependent en entorn domèstic. Dissenyada per a famílies que combinen cuidadores externes, família i equips mèdics.
+**[English](#english)** · **[Català](#català)**
 
-Creada per [LinuxBCN](https://linuxbcn.com) a partir d'una necessitat real — [Article del projecte](https://linuxbcn.com/ca/projectes/cuida/)
+> Free, open-source PWA to coordinate care for a dependent person at home. No subscriptions. No third-party databases. Your data stays in your own private GitHub repo.
 
----
-
-## Funcionalitats
-
-### Informació i coordinació
-- **Inici** — Resum del pacient, pastilla d'estat (tot d'acord / cal revisar / crític), widget d'oxigen, recordatori diari de la cuidadora
-- **Graella** — Horari setmanal de cuidadores amb colors per rol
-- **Contactes** — Equip mèdic, empresa cuidadora, proveïdors i família amb trucada directa i FaceTime
-- **Urgències** — Protocols pas a pas per a cada situació crítica, botó directe al 112
-- **Medicació** — Resum per àpat (Matí / Migdia / Nit / Puntual) + fitxa completa amb dosi, horari i alertes
-- **Config** — Editor complet protegit per contrasenya, export/import JSON
-
-### Diari de seguiment
-- Nota diària amb estat (Bé / A vigilar / Urgent) i text lliure
-- Constants vitals opcionals: tensió arterial, saturació O₂, pes
-- Historial dels últims 90 dies visible per a tota la família
-- Invitació a la portada si avui no hi ha nota
-
-### Notificacions push (app tancada)
-- Recordatoris automàtics de medicació a les **8h, 13:30h i 21h**
-- Cada membre de la família s'subscriu des de la portada amb el seu nom
-- Funciona fins i tot amb el mòbil bloquejat (Android + iOS 16.4+ instal·lada)
-- Sense serveis de tercers — Cloudflare + GitHub Actions
-
-### Mode Estic Sol
-- El pacient activa un temporitzador (1, 2, 3 o 4 hores) quan es queda sol
-- Botó gran verd "Estic bé" per confirmar que tot va bé
-- Si el temps s'esgota sense confirmació → **notificació SOS** a tota la família
-- Comprovació automàtica cada 15 minuts via GitHub Actions
+Made by [LinuxBCN](https://linuxbcn.com) from a real need — [Project article](https://linuxbcn.com/ca/projectes/cuida/)
 
 ---
 
-## Característiques tècniques
+## English
 
-- PWA instal·lable (mobile-first, funciona offline amb service worker)
-- Sense dependències externes — HTML, CSS i JS vanilla
-- Backend: **Cloudflare Pages Functions + GitHub API** per sincronitzar dades entre dispositius
-- Notificacions push: **Web Push API + VAPID** (estàndard W3C, sense Firebase ni serveis externs)
-- Cron: **GitHub Actions** per als recordatoris i check del mode Estic Sol
-- Seguretat: CSP, HSTS, X-Frame-Options, Referrer-Policy, comparació de contrasenyes en temps constant
-- Tipografia IBM Plex Mono (auto-allotjada, sense Google Fonts)
+### What it does
 
----
-
-## Desplegament (Cloudflare Pages)
-
-### 1. Fork del repositori
-
-### 2. Connecta a Cloudflare Pages
-
-- Dashboard → Workers & Pages → Create → Connect to Git
-- Framework: cap · Build command: buit · Build output: `app`
-
-### 3. Configura les dades del pacient
-
-Edita `app/js/dades.js` amb les dades del teu cas (o usa l'editor integrat a Config un cop desplegada).
-
-### 4. Variables d'entorn a Cloudflare Pages
-
-| Variable | Descripció |
+| Feature | Description |
 |---|---|
-| `GITHUB_TOKEN` | Token GitHub amb permís `repo` (read + write) al teu repo privat |
-| `CUIDA_PASSWORD` | Contrasenya per editar les dades des de l'app |
-| `VAPID_PUBLIC_KEY` | Clau pública VAPID (genera-la amb `node scripts/generar-claus-vapid.js`) |
-| `VAPID_PRIVATE_KEY` | Clau privada VAPID en format JWK JSON |
-| `VAPID_SUBJECT` | `mailto:el-teu-email@exemple.com` |
-| `CRON_SECRET` | Paraula de pas aleatòria per autenticar els crons |
+| **Patient summary** | Status badge (OK / Watch / Critical), oxygen widget, daily caregiver reminders |
+| **Contacts** | Medical team, caregivers, providers, family — direct call + FaceTime buttons, printable |
+| **Emergency protocols** | Step-by-step guides for each critical situation (pain, dyspnea, empty oxygen, SOS), direct 112/911 button |
+| **Medication** | Grouped by meal (Morning / Noon / Evening / As needed) with dose, route and notes, printable |
+| **Caregiver schedule** | Weekly grid with color-coded roles |
+| **Daily diary** | Notes with status flag, optional vital signs (BP, O₂ sat, weight), 90-day scrollable history |
+| **Push notifications** | Medication reminders at configurable times — works with screen locked (Android + iOS 16.4+) |
+| **"I'm alone" mode** | Patient activates a 1–4h timer; if not confirmed in time → SOS push to whole family |
+| **Config editor** | Password-protected full data editor + JSON export/import for backup |
 
-Per generar les claus VAPID: `node scripts/generar-claus-vapid.js`
+### Why no backend service?
 
-### 5. Secrets a GitHub Actions
+Everything runs on free-tier infrastructure you control:
 
-Al teu repo → Settings → Secrets → Actions:
+- **Cloudflare Pages** — hosts the app and serverless API functions (free tier: 100k req/day)
+- **GitHub API** — stores and syncs patient data in your private repo (no database needed)
+- **Web Push / VAPID** — W3C standard push notifications without Firebase or any paid service
+- **GitHub Actions** — runs the medication reminder cron and the I'm-alone check (free for public + private repos)
 
-| Secret | Valor |
+### Deploy in 6 steps
+
+**1. Fork this repo and make it private**
+
+Your fork holds your patient's data. Keep it private.
+
+**2. Connect to Cloudflare Pages**
+
+Dashboard → Workers & Pages → Create → Connect to Git
+- Framework: none · Build command: *(empty)* · Build output: `app`
+
+**3. Generate VAPID keys** (for push notifications)
+
+```bash
+node scripts/generar-claus-vapid.js
+```
+
+**4. Set Cloudflare environment variables**
+
+| Variable | Description |
 |---|---|
-| `CRON_SECRET` | La mateixa que a Cloudflare |
-| `CUIDA_URL` | `https://el-teu-projecte.pages.dev` |
+| `GITHUB_TOKEN` | GitHub token with `repo` scope (read + write) on your private fork |
+| `CUIDA_PASSWORD` | Password to edit patient data from the app |
+| `VAPID_PUBLIC_KEY` | Public VAPID key (from step 3) |
+| `VAPID_PRIVATE_KEY` | Private VAPID key in JWK JSON format (from step 3) |
+| `VAPID_SUBJECT` | `mailto:your@email.com` |
 
-### 6. Redesplega i prova
+**5. Set GitHub Actions secret**
 
-Puja els canvis, espera el deploy de Cloudflare, i verifica que `/api/dades` retorna JSON.
+Repo → Settings → Secrets → Actions → New repository secret:
 
----
+| Secret | Value |
+|---|---|
+| `CUIDA_URL` | `https://your-project.pages.dev` |
 
-## Estructura del projecte
+**6. Set your cron auth token**
+
+Generate a random token:
+```bash
+openssl rand -hex 32
+```
+
+Put the same value in these three places:
+- `.github/workflows/_cron-token.txt`
+- `functions/api/notificacions.js` → `const CRON_TOKEN = '...'`
+- `functions/api/estic-sol-check.js` → `const CRON_TOKEN = '...'`
+
+Then enable the cron schedule in both `.github/workflows/*.yml` files by adding:
+```yaml
+on:
+  schedule:
+    - cron: '0 6 * * *'    # 8:00 local (adjust to UTC offset)
+    - cron: '30 11 * * *'  # 13:30 local
+    - cron: '0 19 * * *'   # 21:00 local
+```
+
+Redeploy → verify `/api/dades` returns JSON → done.
+
+### Project structure
 
 ```
 app/
-├── index.html                    # App (7 vistes)
-├── css/estil.css                 # Disseny (grisos, mobile-first)
-├── css/fonts/                    # IBM Plex Mono auto-allotjada
+├── index.html              # App (7 views, single page)
+├── css/estil.css           # Design (grays, mobile-first)
+├── css/fonts/              # IBM Plex Mono self-hosted
 ├── js/
-│   ├── dades.js                  # Dades del pacient + plantilla buida
-│   ├── main.js                   # Lògica: renderitzarX(), diari, estic sol, push
-│   ├── calendari.js              # Graella setmanal
-│   ├── emmagatzematge.js         # Sync remot, export/import JSON
-│   └── traduccions.js            # Textos
-├── icones/                       # Icones PWA (192 i 512px)
-├── imatges/                      # Foto del pacient
-├── service-worker.js             # Cache offline + handler push + notificació SOS
-├── manifest.json                 # PWA manifest
-└── _headers                      # Capçaleres de seguretat Cloudflare
+│   ├── dades.js            # Patient data model + empty template
+│   ├── main.js             # Logic: render, diary, I'm alone, push
+│   ├── calendari.js        # Weekly caregiver grid
+│   └── emmagatzematge.js   # Remote sync, JSON export/import
+├── service-worker.js       # Offline cache + push handler + SOS notification
+└── manifest.json           # PWA manifest
 
 functions/api/
-├── dades.js                      # GET/POST dades principals (GitHub API)
-├── suscripcions.js               # CRUD subscripcions push (data/subs.json)
-├── notificacions.js              # Envia push de medicació (cridat pel cron)
-├── estic-be.js                   # Confirma "estic bé" (sense auth)
-└── estic-sol-check.js            # Comprova timeout estic sol, dispara SOS
+├── dades.js                # GET/POST main data (GitHub API)
+├── suscripcions.js         # CRUD push subscriptions
+├── notificacions.js        # Send medication push (called by cron)
+├── estic-be.js             # Confirm "I'm OK" (no auth needed)
+└── estic-sol-check.js      # Check I'm-alone timeout, trigger SOS
 
 .github/workflows/
-├── notificacions.yml             # Cron 8h, 13:30h, 21h → recordatoris medicació
-└── estic-sol.yml                 # Cron cada 15 min → check mode estic sol
-
-scripts/
-└── generar-claus-vapid.js        # Generador de claus VAPID (una sola vegada)
+├── notificacions.yml       # Medication reminder cron (3×/day)
+├── estic-sol.yml           # I'm-alone check every 15 min
+└── _cron-token.txt         # Auth token — replace with your own value
 ```
 
-## Model de dades
+### Privacy & security
 
-Definit a `app/js/dades.js`. Camps principals:
+- Patient data lives in **your own private GitHub repo** — no third party stores it
+- Client-side login + separate API password for writes
+- Constant-time password comparison (timing attack resistant)
+- Security headers: CSP, HSTS, X-Frame-Options, Referrer-Policy
+- `noindex` — the app won't appear in search engines
+- Push subscriptions stored in `data/subs.json` (outside the public web directory)
 
-| Secció | Descripció |
-|---|---|
-| `pacient` | nom, situació, telèfon, foto, nota |
-| `contactes_medics` | rol, nom, telèfon, notes, prioritat |
-| `rols_familiars` | rol, principal, suplent, telèfon, notes |
-| `empresa_cuidadora` | nom, telèfon, responsable |
-| `cuidadors` | nom, telèfon, horari (array) |
-| `medicacio` | nom, dosi, horari, via, per_a_que, notes, moment (array) |
-| `proveidors` | nom, telèfon, notes (array) |
-| `protocols_urgencies` | situació, passos, responsables, greu (array) |
-| `oxigen` | flux (l/min), notes humidificador |
-| `tasques_cuidadora` | llista de recordatoris diaris (array) |
-| `diari` | entrades diàries: data, estat, text, constants vitals (array) |
-| `estic_sol` | actiu, fins, activat, alerta |
-| `voluntats_anticipades` | existeix, on_esta |
-| `graella` | fase, escenari, cuidadora, ical |
+### License
+
+MIT — Free to use, modify and redistribute.  
+If you use it for a similar project, we'd love to hear about it: [linuxbcn@gmail.com](mailto:linuxbcn@gmail.com)
 
 ---
 
-## Seguretat i privacitat
+## Català
 
-- Les dades del pacient es guarden al **teu propi repo privat de GitHub** — cap empresa externa les té
-- Login client-side + contrasenya API separada per a les escriptures
-- Comparació de contrasenyes en temps constant (resistència a timing attacks)
-- Headers: `noindex`, CSP, HSTS, X-Frame-Options, Referrer-Policy
-- Les subscripcions push es guarden a `data/subs.json` (fora del directori públic)
+**Cuida** és una aplicació web progressiva (PWA) de codi obert per coordinar la cura d'una persona dependent en entorn domèstic. Dissenyada per a famílies que combinen cuidadores externes, família i equips mèdics.
 
----
+### Funcionalitats
 
-## Llicència
+- **Inici** — Resum del pacient, pastilla d'estat (tot d'acord / cal revisar / crític), widget d'oxigen, recordatori diari de la cuidadora
+- **Graella** — Horari setmanal de cuidadores amb colors per rol
+- **Contactes** — Equip mèdic, empresa cuidadora, proveïdors i família amb trucada directa i FaceTime, imprimible
+- **Urgències** — Protocols pas a pas per a cada situació crítica, botó directe al 112
+- **Medicació** — Resum per àpat (Matí / Migdia / Nit / Puntual) + fitxa completa, imprimible
+- **Diari** — Notes diàries amb estat i constants vitals (TA, saturació, pes), historial 90 dies
+- **Notificacions push** — Recordatoris automàtics de medicació, funciona amb mòbil bloquejat (Android + iOS 16.4+)
+- **Mode Estic Sol** — Timer 1–4h amb SOS automàtic a tota la família si no hi ha confirmació
+- **Config** — Editor complet protegit per contrasenya, export/import JSON
 
-MIT — Pots usar, modificar i redistribuir lliurement.
-Si l'uses per a un projecte similar, ens agradaria saber-ho: [linuxbcn@gmail.com](mailto:linuxbcn@gmail.com)
+### Desplegament
+
+Segueix els 6 passos de la secció anglesa — les instruccions s'apliquen igual.
+
+### Model de dades (`app/js/dades.js`)
+
+`pacient` · `contactes_medics` · `rols_familiars` · `empresa_cuidadora` · `cuidadors` · `medicacio` (amb `moments` array: esmorzar/dinar/sopar/altres/continu) · `proveidors` · `protocols_urgencies` · `oxigen` · `tasques_cuidadora` · `diari` · `estic_sol` · `voluntats_anticipades` · `graella`
 
 ---
 

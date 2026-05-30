@@ -1,4 +1,4 @@
-const REPO = '112books/cuida-avi-joan';
+const REPO = '112books/cuida';
 const FILE = 'app/dades.json';
 const GH = 'https://api.github.com';
 
@@ -21,7 +21,7 @@ function timingSafeEqual(a, b) {
 }
 
 const ALLOWED_ORIGINS = [
-  'https://cuida-avi-joan.pages.dev',
+  'https://cuida.pages.dev',
   'https://cuida.linuxbcn.cat',
 ];
 
