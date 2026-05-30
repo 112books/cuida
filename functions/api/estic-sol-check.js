@@ -58,9 +58,9 @@ async function autenticat(request, env) {
     const parts = token.split('.');
     if (parts.length === 3) {
       try {
-        const pad = s => s + '='.repeat((4 - s.length % 4) % 4);
-        const header = JSON.parse(atob(pad(parts[0])));
-        const payload = JSON.parse(atob(pad(parts[1])));
+        const fromB64url = s => atob(s.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - s.length % 4) % 4));
+        const header = JSON.parse(fromB64url(parts[0]));
+        const payload = JSON.parse(fromB64url(parts[1]));
         const aud = payload.aud;
         const audOk = aud === 'cuida-cron' || (Array.isArray(aud) && aud.includes('cuida-cron'));
         if (
