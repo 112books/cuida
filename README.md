@@ -24,6 +24,31 @@ Made by [LinuxBCN](https://linuxbcn.com) from a real need — [Project article](
 | **"I'm alone" mode** | Patient activates a 1–4h timer; if not confirmed in time → SOS push to whole family |
 | **Config editor** | Password-protected full data editor + JSON export/import for backup |
 
+### Screenshots
+
+<table>
+<tr>
+<td><img src="screenshots/01-inici.png" width="200" alt="Home screen"></td>
+<td><img src="screenshots/02-medicacio.png" width="200" alt="Medication view"></td>
+<td><img src="screenshots/03-urgencies.png" width="200" alt="Emergency protocols"></td>
+</tr>
+<tr>
+<td align="center">Home</td>
+<td align="center">Medication</td>
+<td align="center">Emergencies</td>
+</tr>
+<tr>
+<td><img src="screenshots/04-contactes.png" width="200" alt="Contacts"></td>
+<td><img src="screenshots/05-diari.png" width="200" alt="Daily diary"></td>
+<td><img src="screenshots/06-graella.png" width="200" alt="Caregiver schedule"></td>
+</tr>
+<tr>
+<td align="center">Contacts</td>
+<td align="center">Diary</td>
+<td align="center">Schedule</td>
+</tr>
+</table>
+
 ### Why no backend service?
 
 Everything runs on free-tier infrastructure you control:
