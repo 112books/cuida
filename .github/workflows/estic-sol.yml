@@ -1,9 +1,6 @@
 name: Check Mode Estic Sol
 
 on:
-  schedule:
-    # Comprova cada 15 minuts si el timer ha expirat
-    - cron: '*/15 * * * *'
   workflow_dispatch: {}
 
 jobs:
